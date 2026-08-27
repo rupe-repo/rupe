@@ -135,6 +135,11 @@
   transition: opacity 620ms var(--ease-out), transform 620ms var(--ease-out);
 }
 .navpanel.is-open .navpanel__links a { opacity: 1; transform: none; }
+
+/* While Flip is carrying the links between the bar and the panel it is the
+   sole author of their opacity and transform. Handing them a CSS transition on
+   the same properties at the same time is the two-systems-one-transform bug. */
+.navpanel.is-flipping .navpanel__links a { transition: none; }
 .navpanel__index {
   font-size: 0.7rem;
   letter-spacing: 0.2em;

@@ -1,6 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Wordmark } from './RupeMark';
 import { ArrowButton } from './ArrowButton';
+import { loadFlip } from '../lib/gsapPlugins';
+import { useMediaQuery } from '../hooks/useMediaQuery';
+import { prefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import './Navbar.css';
 
 const LINKS = [
@@ -16,6 +19,99 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
+
+  /**
+   * The four links physically travel between the bar and the panel.
+   *
+   * Both lists render the same `LINKS`, so they are the same four items in two
+   * places — a shared-element transition, which is what Flip is for. Matching
+   * is by `data-flip-id`, so Flip animates the 12px bar link into the 4rem
+   * panel link and back rather than cross-dissolving two unrelated lists.
+   *
+   * Progressive enhancement, on three counts. It needs both lists on screen,
+   * so it only runs at >=1024px where `.nav__links` is `display: flex`; below
+   * that the bar links do not exist and the existing CSS transition is
+   * untouched. It is skipped under reduced motion. And if the plugin has not
+   * arrived yet the menu simply opens the way it always did — the toggle never
+   * waits on a network fetch.
+   */
+  const flipRef = useRef<Awaited<ReturnType<typeof loadFlip>> | null>(null);
+  const flipState = useRef<ReturnType<NonNullable<typeof flipRef.current>['getState']> | null>(null);
+  const flipTween = useRef<gsap.core.Timeline | null>(null);
+  const flipTimer = useRef(0);
+  const canFlip = useMediaQuery('(min-width: 1024px)');
+
+  /**
+   * Put both lists back under CSS's control, from any state.
+   *
+   * Sending the timeline to its end runs Flip's own teardown of the inline
+   * width/height/transform it wrote. Reentrant on purpose: `progress(1)` fires
+   * `onComplete`, which lands back here, and the null-out above the kill makes
+   * the second pass a no-op.
+   */
+  const clearFlip = () => {
+    const tl = flipTween.current;
+    flipTween.current = null;
+    window.clearTimeout(flipTimer.current);
+    tl?.progress(1).kill();
+    panelRef.current?.classList.remove('is-flipping');
+  };
+
+  // Fetched on intent, not on mount: the bundle stays out of the entry chunk
+  // and out of the first-open latency.
+  const primeFlip = () => {
+    if (flipRef.current || !canFlip || prefersReducedMotion()) return;
+    loadFlip().then((Flip) => {
+      flipRef.current = Flip;
+    });
+  };
+
+  const toggleMenu = () => {
+    const Flip = flipRef.current;
+    if (Flip && canFlip && !prefersReducedMotion()) {
+      flipState.current = Flip.getState('[data-flip-id]');
+    }
+    setOpen((v) => !v);
+  };
+
+  // Runs after React has committed the new `is-open` classes but before paint,
+  // which is the only moment the "before" and "after" layouts both exist.
+  useLayoutEffect(() => {
+    const state = flipState.current;
+    const Flip = flipRef.current;
+    flipState.current = null;
+    if (!state || !Flip) return;
+
+    // A flip still in the air owns inline styles on both lists; a second one
+    // started on top would strand them. Finish the first properly.
+    clearFlip();
+
+    // Flip owns opacity and transform for the duration; the panel's own CSS
+    // transition on those properties would be a second author on the same
+    // values. `is-flipping` switches it off until Flip is done.
+    panelRef.current?.classList.add('is-flipping');
+
+    flipTween.current = Flip.from(state, {
+      duration: 0.62,
+      ease: 'power2.inOut',
+      // No `absolute: true`. It lifts both lists out of flow for the duration,
+      // and anything that stops the tween early leaves the bar's links
+      // absolutely positioned at stale coordinates. The two lists live in
+      // different containers, so nothing reflows here that would need it.
+      fade: true,
+      nested: true,
+      onComplete: clearFlip,
+    });
+
+    // The callback is not a guarantee — a tab that never gets a frame never
+    // fires it, and the links would keep Flip's inline width/height for the
+    // rest of the session. This is: the animation is over by now, one way or
+    // another.
+    flipTimer.current = window.setTimeout(clearFlip, 1000);
+  }, [open]);
+
+  // An unmount mid-flight would leave the same residue.
+  useEffect(() => clearFlip, []);
 
   // The bar inverts over the dark panels. Sections declare their own tone with
   // `data-nav-theme`, and the one crossing the bar's midline wins.
@@ -120,7 +216,12 @@ export function Navbar() {
 
           <nav className="nav__links" aria-label="Primary">
             {LINKS.map((link) => (
-              <a key={link.href} className="nav__link" href={link.href}>
+              <a
+                key={link.href}
+                className="nav__link"
+                href={link.href}
+                data-flip-id={link.href}
+              >
                 <span>{link.label}</span>
                 <span aria-hidden="true">{link.label}</span>
               </a>
@@ -145,7 +246,9 @@ export function Navbar() {
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? 'Close menu' : 'Open menu'}
-              onClick={() => setOpen((v) => !v)}
+              onPointerEnter={primeFlip}
+              onFocus={primeFlip}
+              onClick={toggleMenu}
             >
               <span />
               <span />
@@ -167,6 +270,7 @@ export function Navbar() {
             <a
               key={link.href}
               href={link.href}
+              data-flip-id={link.href}
               style={{ transitionDelay: `${80 + i * 55}ms` }}
               onClick={() => setOpen(false)}
             >

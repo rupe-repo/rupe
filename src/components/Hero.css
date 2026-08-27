@@ -106,6 +106,13 @@
 .hero__line { display: block; }
 .hero__line > span { display: block; }
 
+/* SplitText owns the reveal (see Hero.tsx). The headline stays transparent
+   until the split lands so the un-split text never flashes; a failsafe timer
+   in the component adds `is-split-ready` even if the plugin never loads, so
+   this can never strand the h1. */
+.hero__headline { opacity: 0; }
+.hero__headline.is-split-ready { opacity: 1; }
+
 .hero__lead {
   max-width: 34ch;
   color: var(--ink-2);

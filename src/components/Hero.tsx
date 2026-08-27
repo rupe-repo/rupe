@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from '../lib/gsap';
+import { loadSplitText } from '../lib/gsapPlugins';
 import { prefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { Arrow } from './ArrowButton';
 import { useMagnetic } from '../hooks/useMagnetic';
@@ -39,7 +40,64 @@ function MoveForwardBadge() {
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
   const ctaRef = useMagnetic<HTMLAnchorElement>(16);
+
+  /**
+   * The headline arrives word by word, out from behind a per-line mask.
+   *
+   * This replaces six hard-coded `[data-reveal-mask]` blocks. The win is not
+   * the extra stagger — it is that SplitText measures the *rendered* lines, so
+   * a line that wraps on a narrow screen gets its own mask instead of sharing
+   * one 108% translate with the line above it. `autoSplit` re-measures when the
+   * font loads or the box changes width, which is exactly when the hard-coded
+   * version was wrong.
+   *
+   * The headline is transparent until the split lands, and a 700ms timer makes
+   * that unconditional: a plugin that fails to load must not cost the visitor
+   * the h1.
+   */
+  useEffect(() => {
+    const el = headlineRef.current;
+    if (!el) return;
+
+    const reveal = () => el.classList.add('is-split-ready');
+    if (prefersReducedMotion()) {
+      reveal();
+      return;
+    }
+
+    let cancelled = false;
+    let split: { revert: () => void } | null = null;
+    const failsafe = window.setTimeout(reveal, 700);
+
+    loadSplitText()
+      .then((SplitText) => {
+        if (cancelled) return;
+        window.clearTimeout(failsafe);
+        split = SplitText.create(el, {
+          type: 'lines,words',
+          mask: 'lines',
+          autoSplit: true,
+          onSplit(self) {
+            reveal();
+            return gsap.from(self.words, {
+              yPercent: 115,
+              duration: 0.9,
+              ease: 'power3.out',
+              stagger: 0.035,
+            });
+          },
+        });
+      })
+      .catch(reveal);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(failsafe);
+      split?.revert();
+    };
+  }, []);
 
   // The hero is pinned while the dark portfolio panel rises over it: the copy
   // drifts up, the veil deepens, and the handover reads as one movement.
@@ -87,14 +145,12 @@ export function Hero() {
             Digital Experience Studio
           </p>
 
-          <h1 className="hero__headline">
-            {HEADLINE.map((line, i) => (
-              <span
-                key={line.text}
-                className="hero__line"
-                data-reveal-mask
-                style={{ ['--reveal-delay' as string]: `${120 + i * 78}ms` }}
-              >
+          {/* No `data-reveal-mask` here: SplitText owns this element's reveal,
+              and two systems on one transform is exactly the bug the rest of
+              this file is careful to avoid. */}
+          <h1 className="hero__headline" ref={headlineRef}>
+            {HEADLINE.map((line) => (
+              <span key={line.text} className="hero__line">
                 <span className={line.accent ? 'accent' : undefined}>{line.text}</span>
                 {/* Separator so the h1 reads as one sentence, not run-together words. */}
                 {' '}

@@ -1,12 +1,56 @@
+import { useEffect, useRef } from 'react';
 import { RupeMark } from './RupeMark';
 import { ArrowButton } from './ArrowButton';
+import { gsap } from '../lib/gsap';
+import { loadDrawSVG } from '../lib/gsapPlugins';
+import { prefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import './FinalCTA.css';
 
 export function FinalCTA() {
+  const watermarkRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * The watermark draws itself when the CTA arrives.
+   *
+   * It is the same contour the 3D mark extrudes, rendered as an open stroke —
+   * so a progressive draw reads as the symbol being written rather than as an
+   * element fading in. Two rings, drawn in sequence: the ribbon body, then the
+   * detached bar.
+   *
+   * `once: true` — this is an arrival, not a scrubbed effect, and it is the
+   * last section on the page. Nothing here should still be doing work while
+   * the visitor reads the CTA.
+   */
+  useEffect(() => {
+    const el = watermarkRef.current;
+    if (!el || prefersReducedMotion()) return;
+
+    let cancelled = false;
+    let ctx: gsap.Context | null = null;
+
+    loadDrawSVG().then(() => {
+      if (cancelled) return;
+      ctx = gsap.context(() => {
+        gsap.from(el.querySelectorAll('path'), {
+          drawSVG: '0%',
+          duration: 1.8,
+          ease: 'power2.inOut',
+          stagger: 0.3,
+          scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+        });
+      }, el);
+    });
+
+    return () => {
+      cancelled = true;
+      ctx?.revert();
+    };
+  }, []);
+
   return (
     <section className="final" id="contact" data-nav-theme="dark">
       <div className="final__glow" aria-hidden="true" />
-      <div className="final__watermark" aria-hidden="true">
+      <div className="final__watermark" aria-hidden="true" ref={watermarkRef}>
         <RupeMark outline strokeWidth={0.55} />
       </div>
 
