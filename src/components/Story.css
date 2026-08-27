@@ -1,0 +1,178 @@
+/* ---------------------------------------------------------------------------
+   The studio's story, mission and vision.
+
+   Dark, like PROCESS and the CTA, so the page reads as light → dark → light
+   rather than gaining a fourth tone. Everything here is negative space and
+   type: no cards, no borders around the ideas, no second WebGL scene.
+   ------------------------------------------------------------------------- */
+.story {
+  position: relative;
+  z-index: 2;
+  background: var(--dark);
+  color: var(--on-dark);
+  padding-block: var(--section-y);
+  overflow: clip;
+}
+
+/* One violet bloom, low and off-centre, so the black is not flat. */
+.story__glow {
+  position: absolute;
+  inset: auto -20% -30% 30%;
+  height: 70%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(124, 58, 237, 0.16), transparent 70%);
+  pointer-events: none;
+}
+
+.story__inner {
+  position: relative;
+  display: grid;
+  gap: clamp(2.5rem, 6vw, 5rem);
+}
+
+/* -- the story ------------------------------------------------------------ */
+.story__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.story__marker {
+  font-family: var(--font-display);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--on-dark-3);
+}
+
+.story__title {
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  letter-spacing: -0.042em;
+  line-height: 0.95;
+  text-transform: uppercase;
+  max-width: 14ch;
+}
+.story__title > span { display: block; }
+
+/* The narrative sits to the right of the headline's column on desktop, which
+   is what gives the block its editorial offset rather than a centred stack. */
+.story__narrative {
+  display: grid;
+  gap: 1.1em;
+  max-width: 54ch;
+  color: var(--on-dark-2);
+  font-size: var(--fs-body);
+  line-height: 1.7;
+}
+.story__turn {
+  color: var(--on-dark);
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.story__signature {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  flex-wrap: wrap;
+  padding-top: clamp(1rem, 3vw, 2rem);
+  border-top: 1px solid var(--dark-line-soft);
+}
+.story__signature p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3.4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.06;
+  text-transform: uppercase;
+}
+.story__signature p span { display: block; }
+/* The third clause is a sentence, not a slogan — it should not shout. */
+.story__signature-long {
+  color: var(--on-dark-3);
+  font-size: 0.42em;
+  letter-spacing: 0.02em;
+  margin-top: 0.7em;
+}
+
+.story__go {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--on-dark);
+  white-space: nowrap;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--dark-line);
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.story__go:hover {
+  color: var(--brand-on-dark);
+  border-color: var(--brand-on-dark);
+}
+.story__go svg { width: 0.85em; height: 0.85em; }
+
+/* -- mission / vision ----------------------------------------------------- */
+.story__pair {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+  padding-top: clamp(1.5rem, 4vw, 3rem);
+  border-top: 1px solid var(--dark-line-soft);
+}
+.story__block { display: grid; gap: 0.9rem; align-content: start; }
+.story__block-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  max-width: 18ch;
+}
+.story__block p:not(.eyebrow) {
+  max-width: 44ch;
+  color: var(--on-dark-2);
+  font-size: var(--fs-body);
+  line-height: 1.7;
+}
+
+/* -- desktop: the editorial offset ---------------------------------------- */
+@media (min-width: 1024px) {
+  .story__inner {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: clamp(3rem, 7vw, 8rem);
+    align-items: start;
+  }
+  .story__head { grid-column: 1 / -1; }
+  /* Headline left, narrative right — the offset the brief asked for, built
+     from the grid rather than from margins. */
+  .story__title { grid-column: 1; }
+  .story__narrative { grid-column: 2; }
+  /* The signature spans back across, closing the block. */
+  .story__signature { grid-column: 1 / -1; }
+  .story__pair {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(3rem, 7vw, 8rem);
+  }
+}
+
+/* -- mobile: its own vertical composition --------------------------------- */
+@media (max-width: 767px) {
+  .story__inner { gap: 2.25rem; }
+  .story__head { flex-direction: column; align-items: flex-start; gap: 0.35rem; }
+  .story__title { max-width: none; }
+  .story__signature { flex-direction: column; align-items: flex-start; }
+  .story__signature-long { font-size: 0.5em; }
+  .story__go { align-self: stretch; justify-content: space-between; }
+}

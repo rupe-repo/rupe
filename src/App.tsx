@@ -5,6 +5,8 @@ import { Portfolio } from './components/Portfolio';
 import { Services } from './components/Services';
 import { Process } from './components/Process';
 import { About } from './components/About';
+import { Story } from './components/Story';
+import { Values } from './components/Values';
 import { FinalCTA } from './components/FinalCTA';
 import { Footer } from './components/Footer';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
@@ -30,6 +32,8 @@ export default function App() {
         <Services />
         <Process />
         <About />
+        <Story />
+        <Values />
         <FinalCTA />
       </main>
       <Footer />

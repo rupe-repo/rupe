@@ -124,6 +124,13 @@ export const DESKTOP_JOURNEY: LogoKeyframe[] = [
   { anchor: '#process', at: 0.94, pose: pose({ x: 42, y: 13, scale: 0.26, rotY: -10, rotZ: 8, solid: 0.85 }) },
   { anchor: '#about', at: 0.15, pose: pose({ x: 44, y: 24, scale: 0.24, solid: 0, outline: 0 }) },
 
+  // STORY and VALUES are the mark's absence, and this keyframe is what makes
+  // that true. `poseAt` interpolates between neighbours, so without a held
+  // state here the ramp from ABOUT's transparent pose to the CTA's solid one
+  // would stretch across both new sections — the mark would drift, half
+  // visible, over the story it is supposed to leave alone.
+  { anchor: '#values', at: 0.92, pose: pose({ x: 44, y: 24, scale: 0.24, solid: 0, outline: 0 }) },
+
   // Anchored to its own slot rather than to hand-picked vw numbers, which is
   // what used to drop it on top of the START A PROJECT button.
   { anchor: '#contact', at: 0.05, anchorTo: '.final__logo-slot',

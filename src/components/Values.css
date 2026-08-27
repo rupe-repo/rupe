@@ -1,0 +1,75 @@
+/* ---------------------------------------------------------------------------
+   Values — a numbered editorial list.
+
+   Light, so the page returns from the dark STORY block before the CTA takes it
+   dark again. Rules between rows instead of cards: the list should read as one
+   document, and a card per value would make five small posters.
+   ------------------------------------------------------------------------- */
+.values {
+  position: relative;
+  z-index: 2;
+  background: var(--bg);
+  padding-block: var(--section-y);
+  overflow: clip;
+}
+
+.values__inner { display: grid; gap: clamp(2.5rem, 6vw, 4.5rem); }
+
+.values__title {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  letter-spacing: -0.038em;
+  line-height: 0.98;
+  text-transform: uppercase;
+  margin-top: 0.6rem;
+}
+.values__title > span { display: block; }
+
+.values__list { display: grid; gap: 0; }
+
+.values__item {
+  display: grid;
+  gap: 0.5rem clamp(1.25rem, 4vw, 3.5rem);
+  padding-block: clamp(1.5rem, 3.5vw, 2.5rem);
+  border-top: 1px solid var(--line);
+}
+.values__item:last-child { border-bottom: 1px solid var(--line); }
+
+.values__index {
+  font-family: var(--font-display);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--brand);
+}
+
+.values__item-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  text-transform: uppercase;
+  max-width: 16ch;
+}
+
+.values__copy {
+  max-width: 46ch;
+  color: var(--ink-3);
+  font-size: var(--fs-body);
+  line-height: 1.7;
+}
+
+/* Desktop: number, claim, consequence — three columns, so the eye can scan the
+   claims down the middle without reading every consequence. */
+@media (min-width: 900px) {
+  .values__item {
+    grid-template-columns: 4rem minmax(0, 1fr) minmax(0, 1.15fr);
+    align-items: start;
+  }
+  .values__index { padding-top: 0.45em; }
+}
+
+@media (max-width: 899px) {
+  .values__index { order: -1; }
+}
