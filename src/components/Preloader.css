@@ -52,21 +52,22 @@
 
 /* Every clause occupies the same box, so the line never reflows as the words
    change length — they replace each other in place. */
+/* All the clauses occupy one grid cell, so the slot sizes itself to the widest
+   and tallest of them and they replace each other in place.
+   Absolute positioning was doing the stacking before, which meant every clause
+   after the first was clipped to the width of "IMAGINAMOS." — the longer ones
+   lost their last letters. */
 .preloader__slot {
-  position: relative;
-  display: block;
-  min-width: 0;
+  display: grid;
   flex: none;
 }
 .preloader__mask {
-  display: block;
+  grid-area: 1 / 1;
   overflow: hidden;
-  /* Each clause after the first stacks on the first, which is the one that
-     gives the slot its height. */
-}
-.preloader__mask + .preloader__mask {
-  position: absolute;
-  inset: 0;
+  /* Room for the accents and the cedilla; the negative margin hands the space
+     back so the line still sits where it should. */
+  padding-block: 0.2em 0.16em;
+  margin-block: -0.2em -0.16em;
 }
 
 .preloader__word,

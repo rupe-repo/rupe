@@ -88,21 +88,24 @@ export function Preloader() {
 
       words.forEach((word, i) => {
         const at = i * STEP;
+        // Out by the time the next one is in: the clauses used to overlap for
+        // 120ms, which read as two words on screen rather than one line being
+        // rewritten. 130% clears the padded mask.
         tl.fromTo(
           word,
-          { yPercent: 110 },
-          { yPercent: 0, duration: 0.28, ease: 'power3.out' },
+          { yPercent: 130 },
+          { yPercent: 0, duration: 0.24, ease: 'power3.out' },
           at,
-        ).to(word, { yPercent: -110, duration: 0.24, ease: 'power2.in' }, at + 0.24);
+        ).to(word, { yPercent: -130, duration: 0.18, ease: 'power2.in' }, at + STEP - 0.18);
       });
 
       const turnAt = words.length * STEP - 0.08;
       tl.fromTo(
         '.preloader__turn',
-        { yPercent: 110 },
+        { yPercent: 130 },
         { yPercent: 0, duration: 0.3, ease: 'power3.out' },
         turnAt,
-      ).to('.preloader__turn', { yPercent: -110, duration: 0.24, ease: 'power2.in' }, turnAt + 0.36);
+      ).to('.preloader__turn', { yPercent: -130, duration: 0.24, ease: 'power2.in' }, turnAt + 0.36);
 
       // The line leaves whole — mark included. Retiring only the words left the
       // sequence's symbol hovering above the brand that was arriving to

@@ -129,14 +129,25 @@ button {
     transform var(--dur-slow) var(--ease-out) var(--reveal-delay, 0ms);
 }
 
+/* The mask has to be taller than the line it hides.
+   Display headings here run a line-height below 1, so the line box is shorter
+   than the font itself — and Portuguese puts glyphs on both sides of it: Ã, Õ,
+   Ê, Ó and Í sit above the cap height, and Ç hangs below the baseline. Clipped
+   to the line box they lose their accents, which is what the English copy this
+   was built on never revealed.
+   The padding grows the mask; the matching negative margin gives the space
+   straight back, so nothing about the layout moves. */
 [data-reveal-mask] {
   display: block;
   overflow: hidden;
-  clip-path: inset(0 0 0 0);
+  padding-block: 0.22em 0.16em;
+  margin-block: -0.22em -0.16em;
 }
 [data-reveal-mask] > span {
   display: block;
-  transform: translate3d(0, 108%, 0);
+  /* Must clear the mask's full height, padding included — 108% used to be the
+     whole box and now leaves the glyph peeking into the bottom padding. */
+  transform: translate3d(0, 135%, 0);
 }
 [data-reveal-mask].is-in > span {
   transform: none;

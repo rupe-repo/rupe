@@ -89,7 +89,8 @@ export function Hero() {
             // Held at the start of its own tween until the page is free, so
             // the arrival plays for someone rather than behind a black panel.
             const tween = gsap.from(self.words, {
-              yPercent: 115,
+              // Clears the padded line mask, not just the line box.
+              yPercent: 140,
               duration: 0.9,
               ease: 'power3.out',
               stagger: 0.035,

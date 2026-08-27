@@ -113,6 +113,16 @@
 .hero__headline { opacity: 0; }
 .hero__headline.is-split-ready { opacity: 1; }
 
+/* SplitText's `mask: 'lines'` wraps each line in a bare div with `overflow:
+   clip`, sized to the line box — 82px against an 88px font here, so every
+   accent and every cedilla was being cut. Same remedy as [data-reveal-mask]:
+   pad the mask, take the space back with a negative margin.
+   Targeted by shape because the wrapper GSAP generates carries no class. */
+.hero__headline > div {
+  padding-block: 0.2em 0.16em;
+  margin-block: -0.2em -0.16em;
+}
+
 .hero__lead {
   max-width: 34ch;
   color: var(--ink-2);
