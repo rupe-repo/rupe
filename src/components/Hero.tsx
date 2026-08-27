@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from '../lib/gsap';
 import { loadSplitText } from '../lib/gsapPlugins';
+import { whenReady } from '../lib/ready';
 import { prefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { Arrow } from './ArrowButton';
 import { useMagnetic } from '../hooks/useMagnetic';
@@ -68,24 +69,40 @@ export function Hero() {
 
     let cancelled = false;
     let split: { revert: () => void } | null = null;
-    const failsafe = window.setTimeout(reveal, 700);
+    // Long enough to outlast the preloader: the failsafe is there for a plugin
+    // that never arrives, not for a curtain that is still up.
+    const failsafe = window.setTimeout(reveal, 5000);
+
+    // `autoSplit` re-splits on resize and font load, so `onSplit` runs more
+    // than once. Each run registers its own gate; all of them are dropped on
+    // unmount, or a listener would outlive the tween it was going to play.
+    const gates: Array<() => void> = [];
 
     loadSplitText()
       .then((SplitText) => {
         if (cancelled) return;
-        window.clearTimeout(failsafe);
         split = SplitText.create(el, {
           type: 'lines,words',
           mask: 'lines',
           autoSplit: true,
           onSplit(self) {
-            reveal();
-            return gsap.from(self.words, {
+            // Held at the start of its own tween until the page is free, so
+            // the arrival plays for someone rather than behind a black panel.
+            const tween = gsap.from(self.words, {
               yPercent: 115,
               duration: 0.9,
               ease: 'power3.out',
               stagger: 0.035,
+              paused: true,
             });
+            gates.push(
+              whenReady(() => {
+                window.clearTimeout(failsafe);
+                reveal();
+                tween.play();
+              }),
+            );
+            return tween;
           },
         });
       })
@@ -93,6 +110,7 @@ export function Hero() {
 
     return () => {
       cancelled = true;
+      for (const drop of gates) drop();
       window.clearTimeout(failsafe);
       split?.revert();
     };

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { prefersReducedMotion } from './usePrefersReducedMotion';
+import { whenReady } from '../lib/ready';
 
 /**
  * One IntersectionObserver for every `[data-reveal]` / `[data-reveal-mask]`
@@ -43,11 +44,18 @@ export function useReveal() {
       });
     };
 
-    scan();
+    // Behind the preloader every hero element is technically on screen, so an
+    // immediate scan would reveal them all against a curtain nobody can see
+    // through — and they would be sitting there, already finished, the moment
+    // it lifted. The observer only starts once the page is free to animate.
     const mutations = new MutationObserver(scan);
-    mutations.observe(document.body, { childList: true, subtree: true });
+    const cancel = whenReady(() => {
+      scan();
+      mutations.observe(document.body, { childList: true, subtree: true });
+    });
 
     return () => {
+      cancel();
       mutations.disconnect();
       observer.disconnect();
     };

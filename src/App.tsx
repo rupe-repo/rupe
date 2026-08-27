@@ -1,3 +1,4 @@
+import { Preloader } from './components/Preloader';
 import { Navbar } from './components/Navbar';
 import { RupeStage } from './components/RupeStage';
 import { Hero } from './components/Hero';
@@ -18,6 +19,7 @@ export default function App() {
 
   return (
     <>
+      <Preloader />
       <a className="skip-link" href="#main">
         Saltar para o conteúdo
       </a>
