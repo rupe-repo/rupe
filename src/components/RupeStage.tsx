@@ -4,25 +4,14 @@ import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import {
   DESKTOP_JOURNEY,
-  MOBILE_JOURNEY,
   poseAt,
   resolveJourney,
   type LogoPose,
   type ResolvedKeyframe,
 } from '../three/logoChoreography';
 import type { LogoScene } from '../three/LogoScene';
+import { hasWebGL } from '../three/hasWebGL';
 import './RupeStage.css';
-
-function hasWebGL(): boolean {
-  try {
-    const canvas = document.createElement('canvas');
-    return Boolean(
-      window.WebGLRenderingContext && (canvas.getContext('webgl2') || canvas.getContext('webgl')),
-    );
-  } catch {
-    return false;
-  }
-}
 
 /**
  * The RUPE symbol, once, for the whole page.
@@ -31,6 +20,11 @@ function hasWebGL(): boolean {
  * Sections never own a canvas — they are only anchors the choreography
  * measures. Scrolling moves the mark; nothing is created or destroyed on the
  * way down the page.
+ *
+ * Desktop only. A phone gets `<HeroMark/>` instead, whose canvas belongs to
+ * the hero rather than to a viewport that iOS Safari resizes underneath it —
+ * see the note there. This component renders nothing below 768px, so the two
+ * never run at once.
  */
 export function RupeStage() {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -47,6 +41,7 @@ export function RupeStage() {
 
   // -- the one scene ------------------------------------------------------
   useEffect(() => {
+    if (isMobile) return;
     const host = hostRef.current;
     if (!host) return;
     if (!hasWebGL()) {
@@ -73,15 +68,8 @@ export function RupeStage() {
         const { LogoScene } = await modulePromise;
         if (cancelled || !hostRef.current) return;
         scene = new LogoScene(hostRef.current, {
-          profile: isMobile ? 'mobile' : 'desktop',
+          profile: 'desktop',
           reducedMotion: reduced,
-          // Mobile: the hero is the only place the mark exists, so the hero is
-          // what the frame loop watches. Once it leaves the screen the loop
-          // stops and nothing wakes it again. Desktop keeps watching the
-          // canvas layer, which is what it has always done.
-          visibilityTarget: isMobile
-            ? (document.getElementById('top') ?? undefined)
-            : undefined,
           // LOW tier: a device that cannot hold a frame rate is served better
           // by the still, which follows the same journey through CSS.
           onTooSlow: () => setFallback(true),
@@ -126,7 +114,8 @@ export function RupeStage() {
 
   // -- the journey --------------------------------------------------------
   useEffect(() => {
-    const journey = isMobile ? MOBILE_JOURNEY : DESKTOP_JOURNEY;
+    if (isMobile) return;
+    const journey = DESKTOP_JOURNEY;
 
     // Resize fires many times per drag and re-measuring walks every anchor, so
     // it is coalesced onto one frame. ScrollTrigger's own refresh is debounced
@@ -175,6 +164,8 @@ export function RupeStage() {
       ScrollTrigger.removeEventListener('refresh', measure);
     };
   }, [isMobile, ready, fallback]);
+
+  if (isMobile) return null;
 
   return (
     <div

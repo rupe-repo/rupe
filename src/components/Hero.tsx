@@ -3,6 +3,7 @@ import { gsap } from '../lib/gsap';
 import { prefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { Arrow } from './ArrowButton';
 import { useMagnetic } from '../hooks/useMagnetic';
+import { HeroMark } from './HeroMark';
 import './Hero.css';
 
 const HEADLINE: Array<{ text: string; accent?: boolean }> = [
@@ -125,10 +126,14 @@ export function Hero() {
         </div>
 
         <div className="hero__visual">
-          {/* The mark itself lives in the page-level <RupeStage/>. This only
-              reserves the space it parks in, so the hero layout is unchanged
-              whether the canvas is up yet or not. */}
-          <div className="hero__logo-slot" aria-hidden="true" />
+          {/* Desktop: the mark lives in the page-level <RupeStage/> and this
+              only reserves the space it parks in, so the hero layout is the
+              same whether the canvas is up yet or not.
+              Mobile: <HeroMark/> puts its canvas *in* this slot, so the mark
+              is carried by the hero rather than by the viewport. */}
+          <div className="hero__logo-slot" aria-hidden="true">
+            <HeroMark />
+          </div>
           <MoveForwardBadge />
         </div>
       </div>

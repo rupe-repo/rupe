@@ -234,7 +234,10 @@
   .hero__headline { letter-spacing: -0.038em; }
   .hero__lead { max-width: 30ch; }
   .hero__visual { margin-top: -1rem; }
-  .hero__logo-slot { width: min(112%, 26rem); }
+  /* Containing block for the mark's canvas. The slot is sized from the
+     viewport width and its own 1:1 ratio, never from the visible height, so
+     iOS Safari's toolbar cannot resize the canvas mid-scroll. */
+  .hero__logo-slot { width: min(112%, 26rem); position: relative; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -53,9 +53,6 @@
   .rupestage__still { will-change: auto; }
 }
 
-/* Mobile: past the hero the mark does not exist, so the layer stops being
-   composited entirely. Desktop keeps the canvas live the whole way down —
-   its journey continues through process, about and the CTA. */
-@media (max-width: 767px) {
-  .rupestage__host.is-off { visibility: hidden; }
-}
+/* Below 768px this component renders nothing at all — the mark belongs to the
+   hero there, via <HeroMark/>. Desktop keeps the canvas live the whole way
+   down: its journey continues through process, about and the CTA. */

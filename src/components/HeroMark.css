@@ -1,0 +1,40 @@
+/* ---------------------------------------------------------------------------
+   The mobile mark's canvas, inside the hero.
+
+   Absolute, not fixed. It fills the hero's logo slot, which layout sizes from
+   the viewport *width* alone — so nothing here moves when iOS Safari's toolbar
+   collapses and the visible height changes mid-scroll.
+   ------------------------------------------------------------------------- */
+.heromark {
+  position: absolute;
+  inset: 0;
+  /* Behind the hero copy and the badge, above the hero backdrop. */
+  z-index: 0;
+  /* The mark is decoration; every tap belongs to the page underneath. */
+  pointer-events: none;
+}
+
+.heromark canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* Fallback still — same slot, same curve, driven by the same timeline. */
+.heromark__still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform:
+    translateY(calc(var(--m-y, 0) * 1%))
+    scale(var(--m-scale, 1))
+    rotate(calc(var(--m-rot, 0) * 1deg));
+  opacity: var(--m-opacity, 1);
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heromark__still { will-change: auto; transform: none; }
+}

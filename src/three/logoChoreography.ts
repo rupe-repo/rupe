@@ -39,61 +39,67 @@ export interface LogoKeyframe {
   anchorTo?: string;
 }
 
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
 const pose = (p: Partial<LogoPose>): LogoPose => ({
   x: 0, y: 0, scale: 1, rotX: 0, rotY: 0, rotZ: 0, solid: 1, outline: 0, ...p,
 });
 
 /**
- * Mobile states — hero only, and still.
+ * Mobile — the mark belongs to the hero, and only to the hero.
  *
- * The mark is a 3D object for exactly one moment: the hero. It never comes
- * back — the rest of the page uses the flat SVG mark, which is the same contour
- * data drawn by the compositor instead of by a fragment shader.
+ * There is no journey here and no keyframe table, because on a phone the mark
+ * no longer travels the document: its canvas lives *inside* the hero, so the
+ * hero scrolling away carries it away. Position is layout's job. All this
+ * function decides is the small amount of motion the mark performs in place,
+ * as a function of the hero's own scroll progress.
  *
- * On a phone it does not move. Every state carries the *same* transform, so
- * scale, rise and roll have nothing to interpolate: only `solid` changes, and
- * only to take the mark off the screen at the end of the hero. Anchored to
- * `.hero__logo-slot`, so it still travels up with the hero content the way any
- * element on the page would — it is pinned to the layout, not animated.
+ * Nothing here reads `window.innerWidth`, `window.innerHeight`, `scrollY` or
+ * the document height. That is the whole point: iOS Safari changes the visible
+ * viewport as its toolbar collapses mid-scroll, and any pose derived from it
+ * jumps when it does. Progress 0…1 over the hero is toolbar-immune.
  *
- * The fade is not optional. The canvas is a fixed viewport-sized layer, so a
- * mark that never goes transparent floats over WORK, SERVICES and everything
- * below it.
- *
- * Every state declares every channel, so none can inherit a leftover.
+ * The envelope is deliberately small. A big transform on a phone is what makes
+ * a dropped frame read as a jump.
  */
-const MOBILE_REST = { scale: 1, rotX: 2, rotY: -4, rotZ: 0 } as const;
+export const MOBILE_HERO = {
+  /** Resting angle. Frontal enough that the monoline mark reads at 390px. */
+  rotX: 2,
+  rotY: -4,
+  /** scale 1 → 1.1 across the hero. */
+  scale: [1, 1.1],
+  /** Rise, as a percentage of the canvas box — about -35px in the hero slot. */
+  y: [0, -9],
+  /** Roll, degrees. */
+  rotZ: [0, 2],
+  /**
+   * Opacity ramp, in hero progress. Finished at 0.9, not 1.0: the mark has to
+   * be gone *before* the hero hands over, not exactly as it does.
+   */
+  fade: [0.72, 0.9],
+} as const;
 
-const MOBILE_STATES = {
-  /** Parked in the hero's reserved slot. Frontal, solid, legible. */
-  hero: pose({ ...MOBILE_REST, solid: 1 }),
-  /** Same pose, still solid — the hold before it goes. */
-  heroLift: pose({ ...MOBILE_REST, solid: 1 }),
-  /** Out. Fully transparent before the hero ends, so nothing crosses into WORK. */
-  heroOut: pose({ ...MOBILE_REST, solid: 0, outline: 0 }),
-} satisfies Record<string, LogoPose>;
+const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
 /**
- * Mobile: 3D in one place, and it holds still.
- *
- *   HERO   the mark is the object, and the only thing WebGL ever draws.
- *   OUT    a straight fade, finished before WORK THAT MOVES is readable.
- *   NEVER  past the hero there is no pose to reach, so the loop parks and the
- *          canvas is hidden. Work, services, process, about and the CTA are
- *          served by `RupeMark` (SVG) instead.
- *
- * `poseAt` holds the last keyframe for every scroll offset beyond it, so this
- * final fully-transparent state covers the entire rest of the document — there
- * is no later keyframe that could pull the mark back onto the page.
+ * The mobile mark's pose at a given hero progress, 0 (hero top at viewport
+ * top) to 1 (hero bottom at viewport top).
  */
-export const MOBILE_JOURNEY: LogoKeyframe[] = [
-  { anchor: '#top', at: 0.0, anchorTo: '.hero__logo-slot', pose: MOBILE_STATES.hero },
-  { anchor: '#top', at: 0.55, anchorTo: '.hero__logo-slot', pose: MOBILE_STATES.heroLift },
-  { anchor: '#top', at: 0.88, anchorTo: '.hero__logo-slot', pose: MOBILE_STATES.heroOut },
-  // Bracketed with the identical state: nothing to interpolate toward, ever.
-  { anchor: '.portfolio__head', at: 0.0, anchorTo: '.hero__logo-slot',
-    pose: MOBILE_STATES.heroOut },
-];
+export function mobileHeroPose(progress: number, out: LogoPose): LogoPose {
+  const t = clamp01(progress);
+  const [f0, f1] = MOBILE_HERO.fade;
+
+  // Position is the canvas's own centre; the hero owns where that is.
+  out.x = 0;
+  out.y = lerp(MOBILE_HERO.y[0], MOBILE_HERO.y[1], t);
+  out.scale = lerp(MOBILE_HERO.scale[0], MOBILE_HERO.scale[1], t);
+  out.rotX = MOBILE_HERO.rotX;
+  out.rotY = MOBILE_HERO.rotY;
+  out.rotZ = lerp(MOBILE_HERO.rotZ[0], MOBILE_HERO.rotZ[1], t);
+  out.solid = 1 - clamp01((t - f0) / (f1 - f0));
+  out.outline = 0;
+  return out;
+}
 
 /**
  * Desktop: the same three moments, told with the width of the screen — and
@@ -177,7 +183,6 @@ export function resolveJourney(frames: LogoKeyframe[]): ResolvedKeyframe[] {
 }
 
 const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 /**
  * Where a keyframe wants the mark, in vw/vh from the viewport centre.
