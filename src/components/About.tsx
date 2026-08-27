@@ -1,7 +1,7 @@
 import { RupeMark } from './RupeMark';
 import './About.css';
 
-const PILLARS = ['Design', 'Development', 'Technology', '3D', 'Artificial intelligence'];
+const PILLARS = ['Design', 'Desenvolvimento', 'Tecnologia', '3D', 'Inteligência artificial'];
 
 export function About() {
   return (
@@ -13,27 +13,27 @@ export function About() {
 
         <div className="about__copy">
           <p className="eyebrow" data-reveal>
-            About the studio
+            A RUPE
           </p>
 
           <h2 className="about__title">
             <span data-reveal-mask>
-              <span>WE DON&apos;T JUST</span>
+              <span>NÃO CONSTRUÍMOS</span>
             </span>{' '}
             <span data-reveal-mask style={{ ['--reveal-delay' as string]: '80ms' }}>
-              <span>BUILD WEBSITES.</span>
+              <span>APENAS WEBSITES.</span>
             </span>
           </h2>
 
           <p className="about__lead" data-reveal style={{ ['--reveal-delay' as string]: '180ms' }}>
-            We create digital experiences people remember.
+            Criamos experiências que as pessoas recordam.
           </p>
 
           <p className="about__body" data-reveal style={{ ['--reveal-delay' as string]: '240ms' }}>
-            A RUPE trabalha no ponto onde design, engenharia e tecnologia se encontram — layout,
-            código, 3D em tempo real e inteligência artificial tratados como um único material.
-            Trabalhamos com poucos projetos por vez, do primeiro esboço até o deploy, para que
-            cada decisão continue defensável na tela e no resultado.
+            A RUPE trabalha no ponto onde design, engenharia e tecnologia se encontram.
+            Tratamos interface, código, 3D e inteligência artificial como partes da mesma
+            experiência — porque uma boa ideia só funciona quando cada detalhe trabalha na
+            mesma direcção.
           </p>
 
           <ul className="about__pillars" data-reveal style={{ ['--reveal-delay' as string]: '300ms' }}>

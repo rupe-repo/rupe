@@ -10,38 +10,38 @@ import './Portfolio.css';
 const CAPABILITIES = [
   'WEB DESIGN',
   'E-COMMERCE',
-  'DEVELOPMENT',
+  'DESENVOLVIMENTO',
   '3D & MOTION',
-  'BRAND SYSTEMS',
-  'AI EXPERIENCES',
+  'SISTEMAS DE MARCA',
+  'EXPERIÊNCIAS COM IA',
 ];
 
 const CASES: ProjectCaseData[] = [
   {
     index: '01',
     title: ['DOCE & ARTE', 'CONFEITARIA'],
-    category: 'E-commerce / Web design / Development',
+    category: 'E-COMMERCE / WEB DESIGN / DESENVOLVIMENTO',
     description:
-      'Transformamos uma experiência de compra baseada em mensagens em uma experiência digital premium.',
-    cta: 'View project',
+      'Transformámos uma experiência de compra dependente de mensagens numa experiência digital mais simples, sofisticada e preparada para crescer.',
+    cta: 'Ver projecto',
     status: 'live',
   },
   {
     index: '02',
-    title: ['PROJECT 02', 'COMING SOON'],
-    category: 'Category / Category / Category',
+    title: ['PRÓXIMO PROJECTO', 'EM BREVE'],
+    category: 'EM PREPARAÇÃO',
     description:
-      'Slot reservado para o próximo case. Substitua título, categoria, descrição e imagens quando o projeto for publicado.',
-    cta: 'Coming soon',
+      'Um novo projecto está em curso. Será publicado aqui assim que estiver no ar.',
+    cta: 'Em breve',
     status: 'placeholder',
   },
   {
     index: '03',
-    title: ['PROJECT 03', 'COMING SOON'],
-    category: 'Category / Category / Category',
+    title: ['PRÓXIMO PROJECTO', 'EM BREVE'],
+    category: 'EM PREPARAÇÃO',
     description:
-      'Slot reservado para o próximo case. Substitua título, categoria, descrição e imagens quando o projeto for publicado.',
-    cta: 'Coming soon',
+      'Um novo projecto está em curso. Será publicado aqui assim que estiver no ar.',
+    cta: 'Em breve',
     status: 'placeholder',
   },
 ];
@@ -91,16 +91,16 @@ export function Portfolio() {
 
       <header className="portfolio__head shell">
         <p className="eyebrow eyebrow--dark" data-reveal>
-          Selected work
+          Projectos seleccionados
         </p>
         <h2 className="portfolio__title" data-reveal-mask>
           <span>
-            WORK THAT <span className="accent--dark">MOVES.</span>
+            TRABALHO QUE FAZ <span className="accent--dark">MARCAS AVANÇAR.</span>
           </span>
         </h2>
         <p className="portfolio__note" data-reveal style={{ ['--reveal-delay' as string]: '160ms' }}>
-          Cada projeto começa com uma pergunta simples: o que precisa acontecer depois que
-          alguém abre esta tela?
+          Cada projecto começa com uma pergunta simples: o que precisa de acontecer depois
+          de alguém chegar até aqui?
         </p>
       </header>
 

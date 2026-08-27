@@ -57,25 +57,26 @@ export function FinalCTA() {
       <div className="shell final__inner">
         <div className="final__lead">
           <p className="eyebrow eyebrow--dark" data-reveal>
-            Let&apos;s work together
+            Vamos trabalhar juntos
           </p>
           <h2 className="final__title">
             <span data-reveal-mask>
-              <span>READY TO</span>
+              <span>PRONTO PARA</span>
             </span>{' '}
             <span data-reveal-mask style={{ ['--reveal-delay' as string]: '90ms' }}>
-              <span className="accent--dark">MOVE FORWARD?</span>
+              <span className="accent--dark">AVANÇAR?</span>
             </span>
           </h2>
         </div>
 
         <div className="final__aside">
           <p data-reveal style={{ ['--reveal-delay' as string]: '160ms' }}>
-            Have a project in mind? Let&apos;s create something impossible to ignore.
+            Tem um projecto em mente? Vamos transformá-lo numa experiência digital difícil
+            de ignorar.
           </p>
           <div data-reveal style={{ ['--reveal-delay' as string]: '240ms' }}>
             <ArrowButton href="mailto:hello@example.com" tone="dark" size="lg">
-              Start a project
+              Falar sobre o projecto
             </ArrowButton>
           </div>
         </div>

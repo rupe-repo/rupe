@@ -28,7 +28,7 @@ export function ProjectCase({
   category,
   description,
   href = '#contact',
-  cta = 'View project',
+  cta = 'Ver projecto',
   status = 'live',
   visual,
   motion = 'reveal',

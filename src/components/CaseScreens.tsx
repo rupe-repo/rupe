@@ -6,8 +6,8 @@ export function PlaceholderMockup({ index }: { index: string }) {
     <div className="devices devices--placeholder" aria-hidden="true">
       <div className="devices__slot">
         <span className="devices__slot-index">{index}</span>
-        <span className="devices__slot-label">Case study slot</span>
-        <span className="devices__slot-hint">Replace with project imagery</span>
+        <span className="devices__slot-label">Projecto em preparação</span>
+        <span className="devices__slot-hint">Em breve</span>
         <svg className="devices__slot-grid" viewBox="0 0 100 62" preserveAspectRatio="none">
           <defs>
             <pattern id={`grid-${index}`} width="10" height="10" patternUnits="userSpaceOnUse">

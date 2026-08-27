@@ -104,3 +104,45 @@
   .footer__col { gap: 0.85rem; }
   .footer__col ul { gap: 0.65rem; }
 }
+
+/* Legal row: the two columns the RGPD pages need, plus the one place the legal
+   entity is named. Deliberately quieter than the menu above it. */
+.footer__legal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  padding-block: clamp(2rem, 4vw, 2.75rem);
+  border-top: 1px solid var(--dark-line);
+}
+.footer__entity p {
+  max-width: 46ch;
+  color: var(--on-dark-3);
+  font-size: var(--fs-micro);
+  line-height: 1.6;
+}
+
+/* The signature. The last thing read, so it is given room and no ornament. */
+.footer__signature {
+  padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  border-top: 1px solid var(--dark-line);
+}
+.footer__signature p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  font-size: clamp(1.5rem, 5vw, 2.75rem);
+  color: var(--on-dark);
+}
+/* Each clause lands on its own line, the way it is written. */
+.footer__signature p span { display: block; }
+.footer__signature-by {
+  margin-top: 0.6em !important;
+  color: var(--brand-on-dark);
+}
+
+@media (max-width: 767px) {
+  .footer__legal { grid-template-columns: 1fr; }
+}

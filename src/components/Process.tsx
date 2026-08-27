@@ -5,10 +5,26 @@ import './Process.css';
 
 
 const STEPS = [
-  { index: '01', title: 'DISCOVER', copy: 'Entendemos seu negócio, seu público e seus objetivos.' },
-  { index: '02', title: 'DESIGN', copy: 'Criamos a estratégia, o design e a experiência.' },
-  { index: '03', title: 'BUILD', copy: 'Desenvolvemos com tecnologia de ponta.' },
-  { index: '04', title: 'LAUNCH', copy: 'Testamos, otimizamos e colocamos no ar.' },
+  {
+    index: '01',
+    title: 'DESCOBERTA',
+    copy: 'Percebemos o negócio, o público, os objectivos e aquilo que precisa realmente de mudar.',
+  },
+  {
+    index: '02',
+    title: 'DESIGN',
+    copy: 'Transformamos estratégia em identidade, interface e experiência.',
+  },
+  {
+    index: '03',
+    title: 'DESENVOLVIMENTO',
+    copy: 'Construímos a experiência com atenção ao detalhe, performance e responsividade.',
+  },
+  {
+    index: '04',
+    title: 'LANÇAMENTO',
+    copy: 'Testamos, optimizamos e colocamos o projecto no ar.',
+  },
 ];
 
 export function Process() {
@@ -57,14 +73,14 @@ export function Process() {
       <div className="shell process__inner">
         <header className="process__head">
           <p className="eyebrow eyebrow--dark" data-reveal>
-            Our process
+            O nosso processo
           </p>
           <h2 className="process__title">
             <span data-reveal-mask>
-              <span>SIMPLE. CLEAR.</span>
+              <span>SIMPLES. CLARO.</span>
             </span>{' '}
             <span data-reveal-mask style={{ ['--reveal-delay' as string]: '90ms' }}>
-              <span className="accent--dark">EFFECTIVE.</span>
+              <span className="accent--dark">EFICAZ.</span>
             </span>
           </h2>
         </header>

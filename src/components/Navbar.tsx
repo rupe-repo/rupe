@@ -7,10 +7,10 @@ import { prefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import './Navbar.css';
 
 const LINKS = [
-  { label: 'WORK', href: '#work' },
-  { label: 'SERVICES', href: '#services' },
-  { label: 'PROCESS', href: '#process' },
-  { label: 'ABOUT', href: '#about' },
+  { label: 'PROJECTOS', href: '#work' },
+  { label: 'SERVIÇOS', href: '#services' },
+  { label: 'PROCESSO', href: '#process' },
+  { label: 'SOBRE', href: '#about' },
 ];
 
 export function Navbar() {
@@ -214,7 +214,7 @@ export function Navbar() {
         <div className="nav__inner shell">
           <Wordmark className="nav__logo" />
 
-          <nav className="nav__links" aria-label="Primary">
+          <nav className="nav__links" aria-label="Principal">
             {LINKS.map((link) => (
               <a
                 key={link.href}
@@ -236,7 +236,7 @@ export function Navbar() {
               size="sm"
               magnetic={false}
             >
-              Start a project
+              Falar sobre o projecto
             </ArrowButton>
 
             <button
@@ -245,7 +245,7 @@ export function Navbar() {
               className="nav__burger"
               aria-expanded={open}
               aria-controls="mobile-menu"
-              aria-label={open ? 'Close menu' : 'Open menu'}
+              aria-label={open ? 'Fechar menu' : 'Abrir menu'}
               onPointerEnter={primeFlip}
               onFocus={primeFlip}
               onClick={toggleMenu}
@@ -265,7 +265,7 @@ export function Navbar() {
         ref={panelRef}
         inert={!open ? true : undefined}
       >
-        <nav className="navpanel__links" aria-label="Mobile">
+        <nav className="navpanel__links" aria-label="Menu">
           {LINKS.map((link, i) => (
             <a
               key={link.href}
@@ -281,9 +281,9 @@ export function Navbar() {
         </nav>
         <div className="navpanel__foot" style={{ transitionDelay: '320ms' }}>
           <ArrowButton href="#contact" onClick={() => setOpen(false)} magnetic={false}>
-            Start a project
+            Falar sobre o projecto
           </ArrowButton>
-          <p>Digital Experience Studio</p>
+          <p>Estúdio de experiências digitais</p>
         </div>
       </div>
     </>

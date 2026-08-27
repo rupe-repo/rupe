@@ -8,12 +8,11 @@ import { HeroMark } from './HeroMark';
 import './Hero.css';
 
 const HEADLINE: Array<{ text: string; accent?: boolean }> = [
-  { text: 'WE BUILD' },
-  { text: 'DIGITAL' },
-  { text: 'EXPERIENCES', accent: true },
-  { text: 'THAT MOVE' },
-  { text: 'BUSINESSES' },
-  { text: 'FORWARD.', accent: true },
+  { text: 'CRIAMOS' },
+  { text: 'EXPERIÊNCIAS', accent: true },
+  { text: 'DIGITAIS QUE' },
+  { text: 'FAZEM NEGÓCIOS' },
+  { text: 'AVANÇAR.', accent: true },
 ];
 
 function MoveForwardBadge() {
@@ -29,7 +28,7 @@ function MoveForwardBadge() {
         </defs>
         <text>
           <textPath href="#badge-path" startOffset="0">
-            MOVE FORWARD · MOVE FORWARD ·&nbsp;
+            AVANÇAR · AVANÇAR ·&nbsp;
           </textPath>
         </text>
       </svg>
@@ -142,7 +141,7 @@ export function Hero() {
       <div className="hero__inner shell">
         <div className="hero__copy">
           <p className="eyebrow hero__eyebrow" data-reveal>
-            Digital Experience Studio
+            Estúdio de experiências digitais
           </p>
 
           {/* No `data-reveal-mask` here: SplitText owns this element's reveal,
@@ -163,8 +162,8 @@ export function Hero() {
             data-reveal
             style={{ ['--reveal-delay' as string]: '680ms' }}
           >
-            Websites, e-commerce and immersive digital experiences that transform brands and
-            drive real results.
+            Websites, e-commerce e experiências digitais concebidas para elevar marcas,
+            simplificar experiências e gerar resultados.
           </p>
 
           <a
@@ -177,7 +176,7 @@ export function Hero() {
             <span className="cta-inline__dot">
               <Arrow />
             </span>
-            <span className="cta-inline__label">Start a project</span>
+            <span className="cta-inline__label">Falar sobre o projecto</span>
           </a>
         </div>
 
@@ -196,7 +195,7 @@ export function Hero() {
 
       <a className="hero__scroll" href="#work">
         <span className="hero__scroll-dot" aria-hidden="true" />
-        Scroll to discover
+        Descobrir
       </a>
     </section>
   );
