@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 // Global layers first, component styles after, so component rules win.
+import './styles/fonts.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/ui.css';
