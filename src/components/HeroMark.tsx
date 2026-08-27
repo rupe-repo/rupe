@@ -39,6 +39,11 @@ export function HeroMark() {
   });
 
   const [fallback, setFallback] = useState(false);
+  // Which path retired the canvas, if any — surfaced as `data-fallback` and in
+  // the `?debug` readout, because "the logo went flat" has three possible
+  // causes and guessing between them from a desktop is how this went wrong.
+  const [reason, setReason] = useState<string | null>(null);
+  const [debug, setDebug] = useState<string>('');
   const isMobile = useIsMobile();
   const reduced = usePrefersReducedMotion();
 
@@ -48,6 +53,7 @@ export function HeroMark() {
     const host = hostRef.current;
     if (!host) return;
     if (!hasWebGL()) {
+      setReason('no-webgl');
       setFallback(true);
       return;
     }
@@ -75,9 +81,15 @@ export function HeroMark() {
           // A phone that cannot draw the mark inside its budget is served
           // better by the still, which follows the identical curve through the
           // same timeline's CSS variables.
-          onTooSlow: () => setFallback(true),
+          // Unreachable while the mobile scene is frozen — the draw-cost path
+          // no longer retires the canvas. Wired for the day it is not.
+          onTooSlow: () => {
+            setReason('too-slow');
+            setFallback(true);
+          },
           onContextLost: () => {
             console.warn('[RUPE] WebGL context lost — falling back to the still');
+            setReason('context-lost');
             setFallback(true);
           },
         });
@@ -85,6 +97,7 @@ export function HeroMark() {
         scene.setPose(mobileHeroPose(0, poseRef.current));
       } catch (error) {
         console.error('[RUPE] hero mark failed to start', error);
+        setReason('boot-error');
         setFallback(true);
       }
     };
@@ -163,10 +176,34 @@ export function HeroMark() {
     return () => ctx.revert();
   }, [isMobile, reduced, fallback]);
 
+  /**
+   * `?debug` prints what the device actually measures, on the device.
+   *
+   * The draw budget was first calibrated from a desktop GPU and was wrong by
+   * enough to retire the canvas on real phones. There is no substitute for
+   * reading the number off the hardware, and a phone has no console to hand.
+   */
+  useEffect(() => {
+    if (!isMobile) return;
+    if (!new URLSearchParams(window.location.search).has('debug')) return;
+    const id = window.setInterval(() => {
+      const scene = sceneRef.current;
+      setDebug(
+        [
+          `draw ${scene ? scene.lastDrawMs.toFixed(2) : '—'} ms`,
+          `dpr ${scene ? scene.dpr.toFixed(2) : '—'}`,
+          `budget ${10} ms`,
+          reason ? `fallback: ${reason}` : scene ? 'webgl ok' : 'booting',
+        ].join(' · '),
+      );
+    }, 500);
+    return () => window.clearInterval(id);
+  }, [isMobile, reason]);
+
   if (!isMobile) return null;
 
   return (
-    <div className="heromark" ref={hostRef}>
+    <div className="heromark" ref={hostRef} data-fallback={reason ?? undefined}>
       {fallback ? (
         <picture>
           <source srcSet="/rupe-logo.avif" type="image/avif" />
@@ -174,6 +211,7 @@ export function HeroMark() {
           <img className="heromark__still" src="/rupe-logo.png" width={1024} height={1024} alt="" />
         </picture>
       ) : null}
+      {debug ? <p className="heromark__debug">{debug}</p> : null}
     </div>
   );
 }

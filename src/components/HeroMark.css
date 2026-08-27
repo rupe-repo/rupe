@@ -38,3 +38,19 @@
 @media (prefers-reduced-motion: reduce) {
   .heromark__still { will-change: auto; transform: none; }
 }
+
+/* `?debug` only — never rendered otherwise. Small, high-contrast, and out of
+   the way, so the number can be read on the device it was measured on. */
+.heromark__debug {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 4px 7px;
+  font: 500 10px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #fff;
+  background: rgba(13, 7, 24, 0.82);
+  border-radius: 4px;
+  pointer-events: none;
+  white-space: nowrap;
+}

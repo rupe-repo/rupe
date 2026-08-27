@@ -80,15 +80,17 @@ const SCENE_PROFILES = {
 const DEG = Math.PI / 180;
 
 /**
- * What one draw of the mark may cost the main thread, in milliseconds.
+ * What one draw of the mark may cost the main thread before the pixel ratio
+ * steps down, in milliseconds.
  *
- * A frozen scene draws once per scroll event, so this is the number that
- * decides whether a scroll reads as smooth or as a stutter — not frame rate.
- * A phone that can run this scene at all submits the draw in one to three
- * milliseconds; six is already most of a frame's budget spent on a mark that
- * is not even moving.
+ * Calibrated badly the first time: 6ms, from a desktop GPU submitting this
+ * draw in 0.5ms. Real phones crossed it, and because the ladder used to end in
+ * retiring the canvas, they lost the 3D mark entirely. The number is looser
+ * now and the only thing it can do is lower the pixel ratio — a reversible,
+ * barely visible change — so being wrong again costs a little sharpness rather
+ * than the whole scene.
  */
-const DRAW_BUDGET_MS = 6;
+const DRAW_BUDGET_MS = 10;
 /** Draws to ignore at the start: geometry and environment uploads land there. */
 const DRAW_WARMUP = 3;
 
@@ -163,13 +165,16 @@ export class LogoScene {
   private readonly raycaster = new THREE.Raycaster();
   private readonly ndc = new THREE.Vector2();
   /** Adaptive pixel ratio — steps down if the device cannot keep up. */
-  private dpr = 1;
+  /** Effective pixel ratio. Public so the `?debug` readout can show it. */
+  dpr = 1;
   private perfSamples = 0;
   private perfAccum = 0;
   private perfStep = 0;
   private drawSamples = 0;
   private drawAccum = 0;
   private drawsSeen = 0;
+  /** Rolling average cost of one draw, in ms. 0 until the first batch lands. */
+  lastDrawMs = 0;
   private readonly clock = new THREE.Clock();
   private frame = 0;
   private visible = true;
@@ -829,6 +834,9 @@ export class LogoScene {
     const avg = this.drawAccum / this.drawSamples;
     this.drawAccum = 0;
     this.drawSamples = 0;
+    // Readable from the device that matters — see the `?debug` readout in
+    // HeroMark. Calibrating this from a desktop is what went wrong before.
+    this.lastDrawMs = avg;
 
     if (avg <= DRAW_BUDGET_MS) {
       this.perfStep = 3; // comfortably fast — stop measuring
@@ -838,18 +846,20 @@ export class LogoScene {
     this.perfStep += 1;
 
     // Mobile starts at 1.25, so there is exactly one step to give — and never
-    // below 1, which is where the frame-rate ladder stops too. Past that the
-    // only lever left is not drawing at all.
+    // below 1, which is where the frame-rate ladder stops too.
     if (this.dpr > 1) {
       this.dpr = 1;
       this.resize();
       return;
     }
 
-    // Handing the visitor the still is a one-way door, so it takes more than a
-    // single slow batch. A device already at DPR 1 has no step to give, and
-    // without this guard one unlucky reading would retire the canvas outright.
-    if (this.perfStep > 2) this.opts.onTooSlow?.();
+    // And that is the end of it. This path deliberately does NOT call
+    // `onTooSlow`: retiring the canvas is a one-way door, and nothing here is
+    // calibrated well enough to justify walking through it. A phone that is
+    // still slow at DPR 1 keeps its 3D mark, drawn a little less often than
+    // ideal, which is a far better failure than a flat image. The genuine
+    // fallbacks — no WebGL, lost context — are untouched and still fire.
+    this.perfStep = 3; // stop measuring; there is nothing left to act on
   }
 
   /**
