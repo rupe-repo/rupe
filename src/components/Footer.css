@@ -1,0 +1,106 @@
+.footer {
+  position: relative;
+  z-index: 2;
+  background: #030208;
+  color: var(--on-dark);
+  padding-top: clamp(2.5rem, 5vw, 4rem);
+  padding-bottom: calc(clamp(1.5rem, 3vw, 2.5rem) + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--dark-line-soft);
+}
+
+.footer__inner {
+  display: grid;
+  gap: clamp(2rem, 4vw, 3rem);
+  grid-template-columns: 1fr;
+  padding-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+@media (min-width: 640px) {
+  .footer__inner { grid-template-columns: repeat(3, 1fr); }
+  .footer__brand { grid-column: 1 / -1; }
+}
+@media (min-width: 1024px) {
+  .footer__inner { grid-template-columns: 1.6fr repeat(3, minmax(0, 1fr)); }
+  .footer__brand { grid-column: auto; }
+}
+
+.footer__brand { display: grid; gap: 0.85rem; align-content: start; justify-items: start; }
+.footer__brand p {
+  font-family: var(--font-display);
+  font-size: var(--fs-micro);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--on-dark-3);
+}
+
+.footer__col { display: grid; gap: 1rem; align-content: start; }
+.footer__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--on-dark-3);
+}
+.footer__col ul { display: grid; gap: 0.55rem; }
+.footer__col a {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0.11em;
+  color: var(--on-dark-2);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.footer__col a:hover { color: #fff; }
+
+.footer__schedule {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--brand-on-dark) !important;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.footer__schedule svg { width: 0.85rem; height: 0.85rem; }
+
+.footer__base {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: clamp(1.25rem, 2.5vw, 2rem);
+  border-top: 1px solid var(--dark-line-soft);
+  font-size: var(--fs-small);
+  color: var(--on-dark-3);
+}
+.footer__top {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.footer__top svg { width: 0.85rem; height: 0.85rem; transform: rotate(-90deg); }
+.footer__top:hover { color: #fff; }
+
+@media (max-width: 767px) {
+  /* The CTA composition needs to finish before this starts. Scoped to mobile
+     so the desktop footer rhythm is untouched. */
+  .footer { padding-top: clamp(64px, 12vw, 110px); }
+}
+
+@media (max-width: 639px) {
+  /* One column, grouped with a consistent rhythm — spaced, not scattered. */
+  .footer__inner {
+    grid-template-columns: 1fr;
+    gap: clamp(1.75rem, 8vw, 2.5rem);
+    padding-bottom: clamp(2rem, 9vw, 3rem);
+  }
+  .footer__brand { gap: 0.6rem; }
+  .footer__col { gap: 0.85rem; }
+  .footer__col ul { gap: 0.65rem; }
+}

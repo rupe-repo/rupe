@@ -1,0 +1,61 @@
+/* ---------------------------------------------------------------------------
+   One canvas for the whole page.
+
+   Fixed to the viewport and never re-created. It sits above the section
+   backgrounds so the mark can read as spatial texture inside the dark
+   sections, and below the navbar. `pointer-events` is off except over the
+   hero, where the mark is still a grabbable object.
+   ------------------------------------------------------------------------- */
+.rupestage {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 900ms var(--ease-out);
+}
+.rupestage.is-ready,
+.rupestage.is-fallback { opacity: 1; }
+
+.rupestage__host {
+  position: absolute;
+  inset: 0;
+}
+
+.rupestage canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* LOW tier: no renderer, same journey. The pose is published as CSS variables
+   so the still travels the page the way the mark would have. */
+.rupestage__still {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 55vmin;
+  height: auto;
+  transform:
+    translate3d(
+      calc(-50% + var(--px, 0) * 1vw),
+      calc(-50% + var(--py, 0) * 1vh),
+      0
+    )
+    scale(var(--pscale, 1))
+    rotate(calc(var(--prot, 0) * 1deg));
+  opacity: var(--popacity, 1);
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rupestage { transition: none; }
+  .rupestage__still { will-change: auto; }
+}
+
+/* Mobile: past the hero the mark does not exist, so the layer stops being
+   composited entirely. Desktop keeps the canvas live the whole way down —
+   its journey continues through process, about and the CTA. */
+@media (max-width: 767px) {
+  .rupestage__host.is-off { visibility: hidden; }
+}

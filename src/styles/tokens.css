@@ -1,0 +1,79 @@
+/* ------------------------------------------------------------------
+   RUPE — design tokens
+   Palette sampled from the reference layout in /assests.
+   ------------------------------------------------------------------ */
+:root {
+  /* Surfaces */
+  --bg: #f7f6fa;
+  --bg-cool: #f1f0f7;
+  --surface: #ffffff;
+  --surface-2: #f2f2f5;
+  --line: rgba(12, 6, 26, 0.09);
+  --line-strong: rgba(12, 6, 26, 0.16);
+
+  /* Dark surfaces */
+  --dark: #050409;
+  --dark-2: #0a0713;
+  --dark-3: #120a24;
+  --dark-line: rgba(255, 255, 255, 0.1);
+  --dark-line-soft: rgba(255, 255, 255, 0.055);
+
+  /* Ink */
+  --ink: #07040d;
+  --ink-2: #2c2639;
+  --ink-3: #635d73;
+  --ink-4: #918c9f;
+  --on-dark: #f4f2f8;
+  --on-dark-2: #b3adc4;
+  --on-dark-3: #8b84a1;
+
+  /* Brand violet */
+  --violet-900: #250a4d;
+  --violet-800: #3a1080;
+  --violet-700: #4e1ba7;
+  --violet-600: #5b23b8;
+  --violet-500: #6d34ce;
+  --violet-400: #8b57e0;
+  --violet-300: #a98cd6;
+  --violet-200: #cbb6ee;
+  --violet-100: #ece3fb;
+
+  --brand: var(--violet-700);
+  --brand-on-dark: #9c68f2;
+
+  /* Type */
+  --font-display: 'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-body: 'Inter', 'Inter Tight', system-ui, -apple-system, sans-serif;
+
+  --fs-eyebrow: 0.6875rem;
+  --fs-micro: 0.6875rem;
+  --fs-small: 0.8125rem;
+  --fs-body: clamp(0.9375rem, 0.88rem + 0.28vw, 1.0625rem);
+  --fs-lead: clamp(1.0625rem, 0.95rem + 0.5vw, 1.375rem);
+  --fs-h3: clamp(1.375rem, 1.1rem + 1.1vw, 2rem);
+  --fs-h2: clamp(2.125rem, 1.3rem + 3.4vw, 4.5rem);
+  --fs-h1: clamp(2.5rem, 1.1rem + 5.6vw, 5.5rem);
+  --fs-display: clamp(3rem, 0.5rem + 9vw, 8.5rem);
+
+  /* Rhythm */
+  --gutter: clamp(1.25rem, 0.6rem + 2.6vw, 4.5rem);
+  --section-y: clamp(5rem, 3rem + 8vw, 11rem);
+  --maxw: 1560px;
+
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 22px;
+  --r-xl: 32px;
+  --r-pill: 999px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-io: cubic-bezier(0.65, 0.05, 0.36, 1);
+  --dur-fast: 220ms;
+  --dur: 480ms;
+  --dur-slow: 900ms;
+
+  --shadow-sm: 0 1px 2px rgba(15, 6, 34, 0.05), 0 6px 18px -10px rgba(15, 6, 34, 0.16);
+  --shadow-md: 0 2px 6px rgba(15, 6, 34, 0.05), 0 24px 48px -28px rgba(15, 6, 34, 0.28);
+  --shadow-violet: 0 30px 70px -40px rgba(78, 27, 167, 0.55);
+}

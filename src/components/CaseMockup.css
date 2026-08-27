@@ -1,0 +1,98 @@
+/* ---------------------------------------------------------------------------
+   Doce & Arte mockup — the approved asset, dropped straight onto the section.
+
+   The PNG is a real cutout: laptop and phone are silhouetted in the alpha
+   channel, so there is no rectangle to disguise. Everything here paints behind
+   the artwork; nothing filters, masks or recolours it.
+   ------------------------------------------------------------------------- */
+
+.mockup {
+  position: relative;
+  margin: 0;
+  /* Reaches past its column on both sides — editorial, not a rigid gutter. */
+  margin-inline: -6% -10%;
+  perspective: 1200px;
+  isolation: isolate;
+}
+
+.mockup__enter,
+.mockup__drift,
+.mockup__tilt {
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.mockup__tilt {
+  transform: translate3d(var(--mx, 0px), var(--my, 0px), 0)
+    rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+}
+
+.mockup__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* The asset carries no shadow of its own once cut out, so the devices get a
+     grounded falloff here rather than floating flat on the background. */
+  filter: drop-shadow(0 44px 60px rgba(2, 0, 8, 0.72))
+    drop-shadow(0 8px 16px rgba(2, 0, 8, 0.5));
+}
+
+/* Ambient violet, as if the composition were lighting the room around it. */
+.mockup__glow {
+  position: absolute;
+  transform-origin: 50% 55%;
+  /* Resting value. The scroll timeline drives this between 0.15 and 0.35;
+     this is what it looks like when that timeline never runs. */
+  opacity: 0.3;
+  inset: 2% -8% -10%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(46% 44% at 52% 54%, rgba(96, 44, 190, 0.3), transparent 70%),
+    radial-gradient(30% 28% at 24% 68%, rgba(139, 87, 224, 0.18), transparent 74%);
+  filter: blur(14px);
+}
+
+/* Pool of contact light under the laptop base. */
+.mockup__cast {
+  position: absolute;
+  left: 14%;
+  right: 6%;
+  bottom: -4%;
+  height: 16%;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(120, 68, 210, 0.34), transparent 72%);
+  filter: blur(28px);
+}
+
+/* Responsive -------------------------------------------------------------- */
+
+@media (max-width: 1023px) {
+  .mockup { margin-inline: -4% -6%; }
+}
+
+/* Mobile: the composition leads. It runs past both edges for impact — the
+   section clips, so this never produces a horizontal scrollbar. */
+@media (max-width: 767px) {
+  .mockup {
+    margin-inline: -9%;
+    width: 118%;
+    perspective: none;
+  }
+  .mockup__img {
+    filter: drop-shadow(0 26px 34px rgba(2, 0, 8, 0.7));
+  }
+  .mockup__glow { inset: 6% -6% -6%; filter: blur(10px); }
+  .mockup__cast { filter: blur(18px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mockup__enter,
+  .mockup__drift {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .mockup__tilt { transform: none; }
+}

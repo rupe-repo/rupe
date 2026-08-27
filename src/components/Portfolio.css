@@ -1,0 +1,211 @@
+.portfolio {
+  position: relative;
+  z-index: 2;
+  background: var(--dark);
+  color: var(--on-dark);
+  border-radius: clamp(18px, 2.4vw, 34px) clamp(18px, 2.4vw, 34px) 0 0;
+  padding-bottom: clamp(3rem, 6vw, 7rem);
+  /* Clip sideways only. `overflow: clip` on both axes makes this box the
+     scrollport for sticky descendants, and the live case's sticky stretch then
+     never engages. The section's own glow is kept inside its top edge below so
+     nothing needs vertical clipping. */
+  overflow-x: clip;
+  overflow-y: visible;
+  isolation: isolate;
+}
+
+.portfolio::before {
+  content: '';
+  position: absolute;
+  /* Starts at the section's own top edge — it used to reach above it, which
+     spilled a wash over the hero once vertical clipping was lifted. */
+  inset: 0 -20% auto -20%;
+  height: 70%;
+  z-index: -1;
+  background:
+    radial-gradient(50% 60% at 22% 0%, rgba(110, 52, 206, 0.28), transparent 68%),
+    radial-gradient(46% 54% at 84% 18%, rgba(58, 16, 128, 0.34), transparent 70%);
+  pointer-events: none;
+}
+
+/* Capability marquee ------------------------------------------------------ */
+.portfolio__marquee {
+  overflow: hidden;
+  border-bottom: 1px solid var(--dark-line-soft);
+  padding-block: clamp(1.1rem, 2vw, 1.6rem);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.portfolio__marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 34s linear infinite;
+}
+.portfolio__marquee-track ul {
+  display: flex;
+  align-items: center;
+}
+.portfolio__marquee-track li {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.6rem, 3vw, 3rem);
+  padding-right: clamp(1.6rem, 3vw, 3rem);
+  font-family: var(--font-display);
+  font-size: clamp(0.7rem, 0.62rem + 0.3vw, 0.85rem);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--on-dark-2);
+  white-space: nowrap;
+}
+.portfolio__marquee-track li span {
+  font-size: 0.5em;
+  color: var(--brand-on-dark);
+}
+@keyframes marquee {
+  to { transform: translate3d(-50%, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portfolio__marquee-track { animation: none; }
+}
+
+/* Section head ------------------------------------------------------------ */
+.portfolio__head {
+  display: grid;
+  gap: clamp(1rem, 2vw, 1.6rem);
+  padding-top: clamp(4rem, 8vw, 8rem);
+  padding-bottom: clamp(2.5rem, 5vw, 5rem);
+}
+.portfolio__title {
+  font-size: var(--fs-h2);
+  text-transform: uppercase;
+  max-width: 18ch;
+}
+.portfolio__note {
+  max-width: 42ch;
+  color: var(--on-dark-2);
+  justify-self: start;
+}
+@media (min-width: 1024px) {
+  .portfolio__head {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    align-items: end;
+  }
+  .portfolio__head .eyebrow { grid-column: 1 / -1; }
+  .portfolio__note { justify-self: end; text-align: left; }
+}
+
+/* Cases ------------------------------------------------------------------- */
+.portfolio__cases { display: grid; }
+
+.case {
+  position: relative;
+  padding-block: clamp(3rem, 7vw, 7rem);
+  border-top: 1px solid var(--dark-line-soft);
+}
+.case__inner {
+  display: grid;
+  gap: clamp(2.25rem, 5vw, 4.5rem);
+  align-items: center;
+}
+@media (min-width: 1024px) {
+  .case__inner {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    min-height: 76svh;
+  }
+
+  /* The live case gives the visual the floor: roughly 40 / 60. */
+  .case--live .case__inner {
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+    column-gap: clamp(1.5rem, 3vw, 3rem);
+  }
+
+  /* Native sticky rather than a ScrollTrigger pin: the case holds the screen
+     for an extra stretch while its timeline keeps running, and the visitor's
+     scroll is never intercepted.
+     The spacer has to be *content*, not padding — a sticky element is bounded
+     by its container's content box, so padding-bottom would shorten the travel
+     instead of lengthening it. */
+  .case--live .case__inner {
+    position: sticky;
+    top: 6vh;
+  }
+  .case--live::after {
+    content: '';
+    display: block;
+    height: 62vh;
+  }
+}
+
+.case__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(0.85rem, 1.4vw, 1.25rem);
+}
+
+.case__cta {
+  display: flex;
+  margin-top: clamp(0.25rem, 1vw, 0.75rem);
+}
+
+.case__index {
+  font-family: var(--font-display);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  color: var(--brand-on-dark);
+}
+
+.case__title {
+  font-size: clamp(2rem, 1.15rem + 3.2vw, 4rem);
+  text-transform: uppercase;
+  line-height: 0.95;
+}
+.case__title > span { display: block; }
+
+.case__category {
+  font-family: var(--font-display);
+  font-size: var(--fs-micro);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--on-dark-3);
+}
+
+.case__desc {
+  max-width: 38ch;
+  color: var(--on-dark-2);
+  margin-top: 0.25rem;
+}
+
+/* `will-change` on .case__visual is applied by the scroll timeline while it is
+   active and released when it parks — see useCaseScrollMotion. */
+
+.case--placeholder .case__title { color: var(--on-dark-2); }
+.case--placeholder .btn { opacity: 0.7; pointer-events: none; }
+
+@media (max-width: 1023px) {
+  .case__inner { grid-template-columns: 1fr; }
+  .case__visual { order: 2; }
+}
+
+/* Mobile reading order: index, title, category, description, mockup, CTA.
+   `display: contents` promotes the copy's children to grid items so the
+   mockup can sit between the description and the button. */
+@media (max-width: 767px) {
+  .case__inner {
+    row-gap: clamp(0.85rem, 3vw, 1.25rem);
+    align-items: start;
+  }
+  .case__copy { display: contents; }
+  .case__index { order: 1; }
+  .case__title { order: 2; }
+  .case__category { order: 3; }
+  .case__desc { order: 4; }
+  .case__visual { order: 5; margin-block: clamp(1.5rem, 6vw, 2.75rem); }
+  .case__cta { order: 6; justify-self: start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case--live .case__inner { position: static; }
+  .case--live::after { display: none; }
+}

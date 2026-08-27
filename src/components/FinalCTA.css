@@ -1,0 +1,156 @@
+.final {
+  position: relative;
+  z-index: 2;
+  background: #030208;
+  color: var(--on-dark);
+  padding-block: clamp(5rem, 10vw, 10rem);
+  border-radius: clamp(18px, 2.4vw, 34px) clamp(18px, 2.4vw, 34px) 0 0;
+  overflow: clip;
+  isolation: isolate;
+}
+
+.final__glow {
+  position: absolute;
+  inset: -20% -10% -30% 10%;
+  z-index: -2;
+  background:
+    radial-gradient(44% 52% at 76% 42%, rgba(96, 40, 200, 0.34), transparent 68%),
+    radial-gradient(40% 44% at 22% 84%, rgba(48, 14, 116, 0.4), transparent 72%);
+  pointer-events: none;
+}
+
+.final__watermark {
+  position: absolute;
+  right: -4%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(16rem, 34vw, 34rem);
+  z-index: -1;
+  color: rgba(168, 132, 255, 0.22);
+  pointer-events: none;
+}
+.final__watermark svg { width: 100%; height: auto; }
+
+.final__inner {
+  display: grid;
+  gap: clamp(2rem, 4vw, 3.5rem);
+  align-items: end;
+  /* Lifts the copy above this section's own decoration (glow, watermark).
+     It does NOT clear the mark canvas: `.final` creates a stacking context at
+     z-index 2 and the canvas is fixed at 3, so nothing inside can outrank it.
+     The button is kept clear compositionally instead — the mark is anchored to
+     `.final__logo-slot`, which begins below the button and never reaches it. */
+  position: relative;
+  z-index: 10;
+}
+
+/* The mark's parking space. On desktop it sits in a third column to the right
+   of the CTA, so the composition stays wide but the button is never underneath
+   it. Anchoring to layout is what keeps this true when the copy changes. */
+.final__logo-slot {
+  display: block;
+  pointer-events: none;
+}
+
+/* The flat mark is a mobile-only stand-in. Above 768px the slot is the empty
+   column the 3D mark is anchored to, exactly as before, so this must not take
+   up any space there. */
+.final__mark { display: none; }
+
+@media (min-width: 900px) {
+  .final__inner {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr) minmax(0, 0.5fr);
+    align-items: center;
+  }
+  .final__logo-slot {
+    align-self: stretch;
+    min-height: 18rem;
+  }
+}
+.final__lead { display: grid; gap: clamp(1rem, 2vw, 1.6rem); justify-items: start; }
+
+.final__title {
+  font-size: var(--fs-h2);
+  text-transform: uppercase;
+}
+.final__title > span { display: block; }
+
+.final__aside {
+  display: grid;
+  gap: clamp(1.25rem, 2.5vw, 2rem);
+  justify-items: start;
+  max-width: 34rem;
+}
+.final__aside p {
+  color: var(--on-dark-2);
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  max-width: 32ch;
+}
+
+@media (max-width: 767px) {
+  .final__watermark { right: -22%; opacity: 0.75; }
+}
+
+/* ---------------------------------------------------------------------------
+   Mobile: the CTA gets room to breathe, and the mark parks in its own slot
+   below the button rather than across it.
+   ------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+  .final {
+    min-height: 70svh;
+    display: flex;
+    align-items: center;
+    padding-block: clamp(3.5rem, 12vw, 5.5rem) clamp(2rem, 8vw, 3.5rem);
+    padding-inline: 0;
+  }
+
+  .final__inner {
+    width: 100%;
+    gap: clamp(1.75rem, 7vw, 2.5rem);
+    align-items: start;
+  }
+
+  .final__lead { gap: clamp(1rem, 4.5vw, 1.5rem); }
+
+  .final__title {
+    /* Two lines, never touching the gutters, readable from 360 to 430. */
+    font-size: clamp(2.1rem, 11.5vw, 3.1rem);
+    text-wrap: balance;
+  }
+
+  .final__aside {
+    gap: clamp(1.5rem, 6vw, 2.25rem);
+    max-width: none;
+  }
+  .final__aside p { max-width: 28ch; }
+
+  /* The mark's parking space. It is deliberately taller than it is wide so the
+     mark reads as coming from below and to the right, cropped by the edge. */
+  .final__logo-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    /* The top margin is the button's clearance: the mark is centred in this
+       box, so the box starting well below the CTA is what keeps it off. */
+    margin-top: clamp(1.5rem, 6vw, 2.5rem);
+    height: clamp(11rem, 32svh, 16rem);
+    pointer-events: none;
+  }
+
+  /* The watermark outline would double up with the 3D mark down here. */
+  .final__watermark { display: none; }
+
+  /* The CTA's symbol on mobile: SVG, not WebGL. Centred in the slot, which
+     starts below the button, so it cannot reach the CTA. */
+  .final__mark {
+    display: block;
+    /* Height-led so it always fits the slot, whatever svh resolves to. */
+    height: min(100%, 11rem);
+    width: auto;
+    color: rgba(178, 141, 255, 0.62);
+    filter: drop-shadow(0 18px 34px rgba(78, 27, 167, 0.45));
+  }
+  .final__glow { inset: -10% -20% -20% 0; }
+}

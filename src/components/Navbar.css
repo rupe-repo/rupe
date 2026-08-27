@@ -1,0 +1,203 @@
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  transition: background-color 400ms var(--ease-out), box-shadow 400ms var(--ease-out);
+}
+
+.nav.is-condensed {
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  /* No `saturate()`. The 3D mark passes underneath this bar, and boosting the
+     saturation of a blurred violet plate is what turned the header into a grey
+     band. Blur alone keeps the glass without inventing a colour. */
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 var(--line);
+}
+
+.nav__inner {
+  padding-top: env(safe-area-inset-top, 0px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  height: clamp(66px, 4.6vw, 88px);
+}
+
+.nav__logo { font-size: clamp(0.85rem, 0.75rem + 0.3vw, 1rem); }
+
+.nav__links {
+  display: none;
+  gap: clamp(1.6rem, 3.2vw, 3.4rem);
+}
+
+@media (min-width: 1024px) {
+  .nav__links { display: flex; }
+}
+
+.nav__link {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  height: 1.1em;
+  font-family: var(--font-display);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.17em;
+  color: var(--ink-2);
+}
+.nav__link > span {
+  grid-area: 1 / 1;
+  transition: transform 460ms var(--ease-out), color 460ms var(--ease-out);
+}
+.nav__link > span:last-child { transform: translateY(110%); color: var(--brand); }
+.nav__link:hover > span:first-child { transform: translateY(-110%); }
+.nav__link:hover > span:last-child { transform: none; }
+
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.nav__cta { display: none; }
+@media (min-width: 768px) { .nav__cta { display: inline-flex; } }
+
+.nav__burger {
+  position: relative;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.nav__burger:hover { background: var(--surface); }
+.nav__burger span {
+  display: block;
+  width: 17px;
+  height: 1.5px;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: transform 400ms var(--ease-out), opacity 300ms var(--ease-out);
+}
+.nav.is-open .nav__burger span:first-child { transform: translateY(3.25px) rotate(45deg); }
+.nav.is-open .nav__burger span:last-child { transform: translateY(-3.25px) rotate(-45deg); }
+
+
+
+/* Mobile panel ------------------------------------------------------------ */
+.navpanel {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3rem;
+  padding:
+    calc(7rem + env(safe-area-inset-top, 0px))
+    var(--gutter)
+    calc(3rem + env(safe-area-inset-bottom, 0px));
+  background: var(--dark);
+  color: var(--on-dark);
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 720ms var(--ease-out);
+  pointer-events: none;
+}
+.navpanel.is-open {
+  clip-path: inset(0 0 0 0);
+  pointer-events: auto;
+}
+
+.nav.is-open .nav__burger { border-color: var(--dark-line); background: transparent; }
+.nav.is-open .nav__burger span { background: var(--on-dark); }
+.nav.is-open .nav__logo { color: var(--on-dark); }
+.nav.is-open .nav__logo .wordmark__mark { color: #fff; }
+
+.navpanel__links {
+  display: grid;
+  gap: 0.35rem;
+}
+.navpanel__links a {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 13vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 620ms var(--ease-out), transform 620ms var(--ease-out);
+}
+.navpanel.is-open .navpanel__links a { opacity: 1; transform: none; }
+.navpanel__index {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--brand-on-dark);
+}
+
+.navpanel__foot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 620ms var(--ease-out), transform 620ms var(--ease-out);
+}
+.navpanel.is-open .navpanel__foot { opacity: 1; transform: none; }
+.navpanel__foot p {
+  font-family: var(--font-display);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--on-dark-3);
+}
+.navpanel__foot .btn { --btn-bg: #fff; --btn-fg: var(--dark); }
+
+@media (prefers-reduced-motion: reduce) {
+  .navpanel { transition: none; }
+  .navpanel__links a, .navpanel__foot { transition: none; }
+}
+
+/* Dark-panel inversion ---------------------------------------------------- */
+.nav.is-dark .nav__logo { color: var(--on-dark); }
+.nav.is-dark .nav__logo .wordmark__mark { color: #fff; }
+.nav.is-dark .nav__link { color: var(--on-dark-2); }
+.nav.is-dark .nav__link > span:last-child { color: var(--brand-on-dark); }
+.nav.is-dark .nav__cta { --btn-fg: var(--on-dark); --btn-bd: var(--dark-line); }
+.nav.is-dark .nav__burger {
+  border-color: var(--dark-line);
+  background: rgba(255, 255, 255, 0.04);
+}
+.nav.is-dark .nav__burger:hover { background: rgba(255, 255, 255, 0.09); }
+.nav.is-dark .nav__burger span { background: var(--on-dark); }
+.nav.is-dark.is-condensed {
+  /* Opaque enough that whatever passes below reads as the page's own dark,
+     not as a lighter band floating over it. */
+  background: color-mix(in srgb, #07060b 92%, transparent);
+  box-shadow: 0 1px 0 var(--dark-line-soft);
+}
+.nav .nav__logo,
+.nav .nav__link,
+.nav .nav__burger,
+.nav .nav__burger span,
+.nav .wordmark__mark {
+  transition:
+    color 420ms var(--ease-out),
+    background-color 420ms var(--ease-out),
+    border-color 420ms var(--ease-out);
+}
+
+.nav.is-open,
+.nav.is-open.is-condensed {
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+.nav.is-open .nav__links { opacity: 0; pointer-events: none; }

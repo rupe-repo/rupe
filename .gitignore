@@ -1,0 +1,5 @@
+node_modules
+dist
+*.tsbuildinfo
+tools/__pycache__
+tools/out/*.npy

@@ -1,0 +1,39 @@
+<!doctype html>
+<!-- Dev-only responsive harness.
+       http://localhost:5173/tools/viewport.html?w=390&h=780
+     Add &raf=timer to drive requestAnimationFrame off a timer inside the frame.
+     Chrome pauses rAF in hidden tabs, which freezes GSAP mid-tween and makes
+     automated screenshots catch half-finished animations.
+     Lives outside public/ so it never ships in a build. -->
+<html><head><meta charset="utf-8"><title>RUPE viewport harness</title>
+<style>html,body{margin:0;background:#1c1c22;height:100%}body{display:grid;place-items:start center}iframe{border:0;display:block;background:#fff}</style>
+</head><body><script>
+  const p = new URLSearchParams(location.search);
+  const f = document.createElement('iframe');
+  f.width = +(p.get('w') || 390);
+  f.height = +(p.get('h') || 780);
+  if (p.get('raf') === 'timer') {
+    f.addEventListener('load', () => {}, { once: true });
+    const patch = () => {
+      const w = f.contentWindow;
+      if (!w) return;
+      try {
+        w.requestAnimationFrame = (cb) => w.setTimeout(() => cb(w.performance.now()), 16);
+        w.cancelAnimationFrame = (id) => w.clearTimeout(id);
+        // Chrome also defers idle callbacks in hidden tabs, which is what keeps
+        // the WebGL scene from ever booting under automation.
+        w.requestIdleCallback = (cb) =>
+          w.setTimeout(() => cb({ didTimeout: true, timeRemaining: () => 8 }), 30);
+        w.cancelIdleCallback = (id) => w.clearTimeout(id);
+        Object.defineProperty(w.document, 'hidden', { get: () => false, configurable: true });
+        Object.defineProperty(w.document, 'visibilityState', { get: () => 'visible', configurable: true });
+      } catch (e) { /* not ready yet */ }
+    };
+    // Keep re-applying: a cold Vite transform can push the app's first idle
+    // callback well past a short window.
+    const timer = setInterval(patch, 8);
+    setTimeout(() => clearInterval(timer), 12000);
+  }
+  f.src = p.get('src') || '/';
+  document.body.appendChild(f);
+</script></body></html>
