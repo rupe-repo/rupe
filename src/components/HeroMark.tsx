@@ -72,6 +72,10 @@ export function HeroMark() {
           // The hero gates the frame loop. Once it leaves the screen the loop
           // stops, and there is no later keyframe that could wake it.
           visibilityTarget: document.getElementById('top') ?? undefined,
+          // A phone that cannot draw the mark inside its budget is served
+          // better by the still, which follows the identical curve through the
+          // same timeline's CSS variables.
+          onTooSlow: () => setFallback(true),
           onContextLost: () => {
             console.warn('[RUPE] WebGL context lost — falling back to the still');
             setFallback(true);

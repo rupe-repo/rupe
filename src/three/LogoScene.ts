@@ -79,6 +79,19 @@ const SCENE_PROFILES = {
 
 const DEG = Math.PI / 180;
 
+/**
+ * What one draw of the mark may cost the main thread, in milliseconds.
+ *
+ * A frozen scene draws once per scroll event, so this is the number that
+ * decides whether a scroll reads as smooth or as a stutter — not frame rate.
+ * A phone that can run this scene at all submits the draw in one to three
+ * milliseconds; six is already most of a frame's budget spent on a mark that
+ * is not even moving.
+ */
+const DRAW_BUDGET_MS = 6;
+/** Draws to ignore at the start: geometry and environment uploads land there. */
+const DRAW_WARMUP = 3;
+
 
 /** Drag tuning. A container width of travel sweeps about three quarters of a turn. */
 
@@ -154,6 +167,9 @@ export class LogoScene {
   private perfSamples = 0;
   private perfAccum = 0;
   private perfStep = 0;
+  private drawSamples = 0;
+  private drawAccum = 0;
+  private drawsSeen = 0;
   private readonly clock = new THREE.Clock();
   private frame = 0;
   private visible = true;
@@ -595,7 +611,11 @@ export class LogoScene {
     if (this.frozen && !this.dragging) {
       this.dragShown.copy(this.dragQuat);
       Object.assign(this.posed, this.pose);
-      if (this.applyPose()) this.render();
+      if (this.applyPose()) {
+        const started = performance.now();
+        this.render();
+        this.sampleDrawCost(performance.now() - started);
+      }
       this.stop();
       return;
     }
@@ -776,6 +796,60 @@ export class LogoScene {
     const h = this.container.clientHeight || 1;
     const fovRad = THREE.MathUtils.degToRad(this.camera.fov);
     return (2 * Math.tan(fovRad / 2) * this.camera.position.z) / h;
+  }
+
+  /**
+   * The same adaptive ladder as `samplePerf`, for a scene that parks.
+   *
+   * `samplePerf` measures frame rate, which is meaningless here: a frozen
+   * scene draws once per scroll event and sleeps in between, so it can never
+   * "fall behind". What can still ruin a scroll is a single draw that takes
+   * too long, so that is what this measures — and it steps the pixel ratio
+   * down, then hands over to the still, exactly as the frame-rate path does.
+   *
+   * One honest limit: `performance.now()` around `render()` measures the CPU
+   * cost of submitting the draw, not the GPU's cost of executing it. A driver
+   * that queues the work and returns looks fast here. It catches the common
+   * mobile failure — a fill-rate-bound draw back-pressuring into the call —
+   * and it will not catch every slow device.
+   */
+  private sampleDrawCost(ms: number) {
+    // Phones only. A desktop asking for reduced motion is frozen too, but its
+    // canvas is the whole viewport at DPR 1.75 — a completely different budget
+    // — and retiring the desktop mark is not this change's business.
+    if (!this.mobile || !this.frozen || this.perfStep > 2) return;
+
+    this.drawsSeen += 1;
+    if (this.drawsSeen <= DRAW_WARMUP) return;
+
+    this.drawAccum += ms;
+    this.drawSamples += 1;
+    if (this.drawSamples < 12) return;
+
+    const avg = this.drawAccum / this.drawSamples;
+    this.drawAccum = 0;
+    this.drawSamples = 0;
+
+    if (avg <= DRAW_BUDGET_MS) {
+      this.perfStep = 3; // comfortably fast — stop measuring
+      return;
+    }
+
+    this.perfStep += 1;
+
+    // Mobile starts at 1.25, so there is exactly one step to give — and never
+    // below 1, which is where the frame-rate ladder stops too. Past that the
+    // only lever left is not drawing at all.
+    if (this.dpr > 1) {
+      this.dpr = 1;
+      this.resize();
+      return;
+    }
+
+    // Handing the visitor the still is a one-way door, so it takes more than a
+    // single slow batch. A device already at DPR 1 has no step to give, and
+    // without this guard one unlucky reading would retire the canvas outright.
+    if (this.perfStep > 2) this.opts.onTooSlow?.();
   }
 
   /**
