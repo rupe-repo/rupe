@@ -2,7 +2,7 @@
    The way in.
 
    A full-viewport curtain in the site's own black, lifted by clip-path at the
-   end. Type and one SVG path — nothing here allocates a GPU context.
+   end. The mark holds still; the words come out from behind it.
    ------------------------------------------------------------------------- */
 .preloader {
   position: fixed;
@@ -19,7 +19,7 @@
 }
 
 /* The page does not scroll while the curtain is down. Set and removed through
-   `is-preloading` so nothing can leave `overflow: hidden` stranded on <body>
+   `is-preloading`, so nothing can leave `overflow: hidden` stranded on <body>
    if the timeline throws — the class goes when the gate opens, always. */
 :root.is-preloading,
 :root.is-preloading body {
@@ -28,94 +28,62 @@
 
 .preloader__stage {
   display: grid;
-  gap: clamp(2rem, 6vh, 3.5rem);
+  gap: clamp(1rem, 3vh, 1.6rem);
   justify-items: center;
-  width: 100%;
-  max-width: 46rem;
 }
 
-/* -- the sequence --------------------------------------------------------- */
+/* -- mark and door -------------------------------------------------------- */
 .preloader__line {
   display: flex;
   align-items: center;
-  gap: clamp(0.7rem, 2vw, 1.1rem);
-  width: 100%;
-  justify-content: center;
+  gap: clamp(0.7rem, 2vw, 1.15rem);
 }
 
 .preloader__mark {
-  width: clamp(1.6rem, 4vw, 2.4rem);
+  width: clamp(1.8rem, 4.5vw, 2.8rem);
   height: auto;
   color: var(--brand-on-dark);
   flex: none;
+  /* GSAP's autoAlpha writes visibility too, so this starts genuinely hidden. */
+  visibility: hidden;
+  opacity: 0;
 }
 
-/* Every clause occupies the same box, so the line never reflows as the words
-   change length — they replace each other in place. */
-/* All the clauses occupy one grid cell, so the slot sizes itself to the widest
-   and tallest of them and they replace each other in place.
-   Absolute positioning was doing the stacking before, which meant every clause
-   after the first was clipped to the width of "IMAGINAMOS." — the longer ones
-   lost their last letters. */
-.preloader__slot {
+/* The door itself. Every clause shares one grid cell, so the window takes the
+   width of the longest and the line never reflows as the words change. The
+   overflow is what makes a clause parked at -100% read as "behind the mark". */
+.preloader__window {
   display: grid;
-  flex: none;
-}
-.preloader__mask {
-  grid-area: 1 / 1;
   overflow: hidden;
-  /* Room for the accents and the cedilla; the negative margin hands the space
-     back so the line still sits where it should. */
+  flex: none;
+  /* Room for the accents and the cedilla — Ç hangs below the baseline and Ê Ó Í
+     sit above the cap height, and a mask cut to the line box slices them off.
+     The negative margin hands the space straight back. */
   padding-block: 0.2em 0.16em;
   margin-block: -0.2em -0.16em;
 }
 
-.preloader__word,
-.preloader__turn {
-  display: block;
+.preloader__word {
+  grid-area: 1 / 1;
+  white-space: nowrap;
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 6vw, 3rem);
+  font-size: clamp(1.4rem, 5.4vw, 2.75rem);
   font-weight: 700;
   letter-spacing: -0.035em;
   line-height: 1.1;
   text-transform: uppercase;
-  white-space: nowrap;
 }
-.preloader__turn { color: var(--brand-on-dark); }
+.preloader__word--brand { color: #fff; }
 
-/* -- the brand ------------------------------------------------------------ */
-.preloader__brand {
-  display: grid;
-  justify-items: center;
-  gap: 0.85rem;
-  /* GSAP's autoAlpha writes visibility too, so this starts genuinely hidden
-     rather than transparent-but-hit-testable. */
-  visibility: hidden;
-  opacity: 0;
-}
-.preloader__brand-lockup {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-}
-.preloader__brand-mark {
-  width: clamp(1.5rem, 3.6vw, 2.1rem);
-  height: auto;
-  color: #fff;
-}
-.preloader__brand-type {
-  font-family: var(--font-display);
-  font-size: clamp(1.35rem, 3.4vw, 1.9rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  text-transform: uppercase;
-}
-.preloader__brand-desc {
+.preloader__desc {
+  margin: 0;
   text-align: center;
   font-size: var(--fs-micro);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--on-dark-3);
+  visibility: hidden;
+  opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

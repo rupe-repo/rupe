@@ -5,24 +5,39 @@ import { holdUntilReady, release } from '../lib/ready';
 import { prefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import './Preloader.css';
 
-/** What the studio does, in the order it does it. */
-const WORDS = ['IMAGINAMOS.', 'DESENHAMOS.', 'CONSTRUÍMOS.', 'FAZEMOS AVANÇAR.'];
+/** What the studio does, in the order it does it. The brand closes the list. */
+const WORDS = ['IMAGINAMOS.', 'DESENHAMOS.', 'CONSTRUÍMOS.', 'FAZEMOS AVANÇAR.', 'AVANÇAR.'];
+
+/**
+ * Timing, in one place, because it is the thing most likely to need tuning.
+ *
+ * `HOLD` is the whole point: a clause has to sit still long enough to be read,
+ * not merely long enough to be seen. Add the slide-in to it and each clause is
+ * legible for roughly three quarters of a second.
+ */
+const MARK_IN = 0.5;
+const WORD_IN = 0.42;
+const WORD_HOLD = 0.45;
+const WORD_OUT = 0.32;
+const BRAND_HOLD = 0.55;
 
 /**
  * The way in.
  *
- * No spinner, no percentage, no bar: those measure a wait, and this is not a
- * wait — the page behind it is already building. It is a sentence, delivered
- * one clause at a time, that ends on the brand.
+ * The mark arrives first and then does not move. Every clause slides out from
+ * behind it, holds, and retreats back behind it — the symbol is the door the
+ * whole sentence comes through, and the last thing to come through it is the
+ * brand's own name.
  *
- * Type only. There is no second WebGL context here and no renderer of its own;
- * the mark is the same SVG contour the rest of the site draws from, so the
- * preloader costs an SVG path and a timeline. The 3D scene boots behind the
- * curtain, which means its shader compile lands where nobody is looking.
+ * The "behind" is a clip, not a stacking trick: the words live in a window
+ * whose left edge is the mark's right edge, so a clause translated fully left
+ * is outside the window and simply not drawn. Nothing ever overlaps the mark,
+ * which matters because the mark is a monoline outline — anything sliding
+ * under it would show through its gaps.
  *
- * Everything that could strand the visitor is guarded: a failed timeline, an
- * unmount mid-flight and a hard timeout all end in the same `finish()`, and
- * `finish()` is idempotent.
+ * Type and one SVG path. No second WebGL context, no renderer of its own; the
+ * 3D scene boots behind the curtain, so its shader compile lands where nobody
+ * is looking.
  */
 export function Preloader() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -31,14 +46,13 @@ export function Preloader() {
   useEffect(() => {
     const root = rootRef.current;
     if (!root) {
-      // Nothing to play, so make sure nothing is left holding the scroll.
       release();
       return;
     }
 
-    // Scoped to this run of the effect, not to the component. A guard that
-    // outlives the run would let a second run close the gate and then decline
-    // to open it — which is precisely how the page got stuck.
+    // Scoped to this run of the effect, not to the component: a guard that
+    // outlived the run once let a second run close the gate and then decline
+    // to open it, stranding the page with no scroll and nothing on screen.
     let ended = false;
     const finish = () => {
       if (ended) return;
@@ -58,88 +72,72 @@ export function Preloader() {
     }
 
     holdUntilReady();
-    // Never let a thrown timeline leave someone looking at a black screen.
-    const failsafe = window.setTimeout(finish, 6000);
+    const failsafe = window.setTimeout(finish, 14000);
 
     const ctx = gsap.context(() => {
       const words = gsap.utils.toArray<HTMLElement>('.preloader__word');
+      const brand = words[words.length - 1];
+      const clauses = words.slice(0, -1);
       const tl = gsap.timeline({ onComplete: finish });
 
       // `?preloader` holds the sequence at its first frame and hands it over,
-      // so it can be scrubbed and reviewed. Without this the only way to see
-      // a three-second animation that plays once per load is to keep
-      // reloading and hope to catch the right moment.
+      // so it can be scrubbed. A sequence that plays once per load is
+      // otherwise reviewable only by reloading and hoping to catch a moment.
       if (new URLSearchParams(window.location.search).has('preloader')) {
         tl.pause();
         window.clearTimeout(failsafe);
         (window as unknown as { __rupePreloader?: gsap.core.Timeline }).__rupePreloader = tl;
       }
 
-      // Absolute positions, not relative ones. Chained `'>'` offsets read
-      // nicely and silently accumulate: the first version of this timeline
-      // added up to 6.8s against a 2.5–3.5s budget. Laid out on one clock, the
-      // total is legible at a glance and stays inside it.
-      //
-      //   0.00–1.56  four clauses, each rising in and leaving upward
-      //   1.52–2.12  the turn
-      //   2.06–2.87  the brand arrives and is allowed to just be there
-      //   2.87–3.35  the curtain lifts
-      const STEP = 0.36;
+      // The mark arrives, and from here it holds absolutely still. Everything
+      // else in the sequence is measured against it.
+      tl.fromTo(
+        '.preloader__mark',
+        { autoAlpha: 0, scale: 0.82 },
+        { autoAlpha: 1, scale: 1, duration: MARK_IN, ease: 'power3.out' },
+        0,
+      );
 
-      words.forEach((word, i) => {
-        const at = i * STEP;
-        // Out by the time the next one is in: the clauses used to overlap for
-        // 120ms, which read as two words on screen rather than one line being
-        // rewritten. 130% clears the padded mask.
+      // One clause at a time, fully gone before the next appears. `xPercent`
+      // is relative to each clause's own width, so -100 puts any of them
+      // exactly at the window's left edge whatever their length.
+      let at = MARK_IN + 0.1;
+      clauses.forEach((word) => {
         tl.fromTo(
           word,
-          { yPercent: 130 },
-          { yPercent: 0, duration: 0.24, ease: 'power3.out' },
+          { xPercent: -100 },
+          { xPercent: 0, duration: WORD_IN, ease: 'power3.out' },
           at,
-        ).to(word, { yPercent: -130, duration: 0.18, ease: 'power2.in' }, at + STEP - 0.18);
+        ).to(word, { xPercent: -100, duration: WORD_OUT, ease: 'power2.in' }, at + WORD_IN + WORD_HOLD);
+        at += WORD_IN + WORD_HOLD + WORD_OUT;
       });
 
-      const turnAt = words.length * STEP - 0.08;
+      // The brand comes through the same door and stays.
       tl.fromTo(
-        '.preloader__turn',
-        { yPercent: 130 },
-        { yPercent: 0, duration: 0.3, ease: 'power3.out' },
-        turnAt,
-      ).to('.preloader__turn', { yPercent: -130, duration: 0.24, ease: 'power2.in' }, turnAt + 0.36);
-
-      // The line leaves whole — mark included. Retiring only the words left the
-      // sequence's symbol hovering above the brand that was arriving to
-      // replace it, which is two marks on screen saying different things.
-      tl.to(
-        '.preloader__line',
-        { autoAlpha: 0, y: -18, duration: 0.3, ease: 'power2.in' },
-        turnAt + 0.4,
+        brand,
+        { xPercent: -100 },
+        { xPercent: 0, duration: WORD_IN + 0.1, ease: 'power3.out' },
+        at,
+      );
+      tl.fromTo(
+        '.preloader__desc',
+        { autoAlpha: 0, y: 10 },
+        { autoAlpha: 1, y: 0, duration: 0.4, ease: 'power2.out' },
+        at + 0.3,
       );
 
-      // Everything has cleared; the brand arrives on its own.
-      tl.fromTo(
-        '.preloader__brand',
-        { autoAlpha: 0, y: 14 },
-        { autoAlpha: 1, y: 0, duration: 0.36, ease: 'power3.out' },
-        turnAt + 0.54,
-      );
-
-      // The curtain lifts from the bottom edge, revealing the hero already in
-      // place beneath it. The brand leaves with it rather than before it.
-      const openAt = turnAt + 1.35;
+      // The brand is allowed to just be there before the page arrives.
+      const openAt = at + WORD_IN + 0.1 + BRAND_HOLD;
       tl.to(
         root,
-        { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.48, ease: 'power3.inOut' },
+        { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.55, ease: 'power3.inOut' },
         openAt,
-      ).to('.preloader__stage', { y: -40, autoAlpha: 0, duration: 0.38, ease: 'power2.in' }, openAt);
-
+      ).to('.preloader__stage', { y: -34, autoAlpha: 0, duration: 0.42, ease: 'power2.in' }, openAt);
     }, root);
 
     // Tear down only. Finishing here would end the sequence before it played:
-    // React's development double-invoke runs mount → cleanup → mount, so a
-    // cleanup that called `finish()` retired the preloader on the very first
-    // cycle and it was never seen. The gate is opened by the timeline, the
-    // failsafe, or the hard release below — never by teardown.
+    // React's development double-invoke runs mount → cleanup → mount, and a
+    // cleanup that finished retired the preloader on the very first cycle.
     return () => {
       ctx.revert();
       window.clearTimeout(failsafe);
@@ -154,28 +152,19 @@ export function Preloader() {
         <div className="preloader__line">
           <RupeMark className="preloader__mark" />
 
-          <span className="preloader__slot">
+          {/* The door. Its left edge is the mark's right edge, so a clause
+              parked at -100% is clipped away entirely. */}
+          <span className="preloader__window">
             {WORDS.map((word) => (
-              <span className="preloader__mask" key={word}>
-                <span className="preloader__word">{word}</span>
+              <span className="preloader__word" key={word}>
+                {word}
               </span>
             ))}
-            <span className="preloader__mask">
-              <span className="preloader__turn">AVANÇAR.</span>
-            </span>
+            <span className="preloader__word preloader__word--brand">RUPE</span>
           </span>
         </div>
 
-        <div className="preloader__brand">
-          {/* Mark and wordmark are one lockup; the descriptor sits under both.
-              Laying all three out as grid columns let the descriptor's width
-              push the mark away from the word it belongs to. */}
-          <span className="preloader__brand-lockup">
-            <RupeMark className="preloader__brand-mark" />
-            <span className="preloader__brand-type">RUPE</span>
-          </span>
-          <span className="preloader__brand-desc">Estúdio de experiências digitais</span>
-        </div>
+        <p className="preloader__desc">Estúdio de experiências digitais</p>
       </div>
     </div>
   );
