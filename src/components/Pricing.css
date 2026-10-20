@@ -1,0 +1,157 @@
+/* Light, between the dark HOW IT WORKS and MAINTENANCE sections. */
+.pricing {
+  position: relative;
+  z-index: 2;
+  background: var(--bg);
+  padding-block: var(--section-y);
+  border-radius: clamp(18px, 2.4vw, 34px) clamp(18px, 2.4vw, 34px) 0 0;
+}
+
+.pricing__head { margin-bottom: clamp(2.5rem, 5vw, 4.5rem); }
+.pricing__title > span { display: block; }
+
+/* Cards ------------------------------------------------------------------- */
+.plans {
+  display: grid;
+  gap: clamp(0.75rem, 1.4vw, 1.25rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  align-items: stretch;
+}
+
+.plan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: clamp(1.4rem, 2.4vw, 2.1rem);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  transition:
+    background-color 480ms var(--ease-out),
+    border-color 480ms var(--ease-out),
+    transform 620ms var(--ease-out);
+}
+.plan:hover {
+  background: var(--surface);
+  border-color: var(--line);
+  transform: translateY(-4px);
+}
+
+.plan--featured,
+.plan--featured:hover {
+  background:
+    radial-gradient(120% 80% at 85% 0%, rgba(139, 87, 224, 0.32), transparent 60%),
+    var(--dark-2);
+  border-color: var(--dark-line);
+  color: var(--on-dark);
+  box-shadow: var(--shadow-violet);
+}
+
+.plan__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.plan__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+.plan--featured .plan__name { color: var(--brand-on-dark); }
+
+.plan__badge {
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--r-pill);
+  background: var(--brand-on-dark);
+  color: var(--dark);
+  font-family: var(--font-display);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.plan__kind {
+  font-size: var(--fs-h3);
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.plan__price {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 1.6rem + 3vw, 3.75rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.plan__price-request {
+  display: inline-block;
+  font-size: 0.55em;
+  letter-spacing: -0.02em;
+}
+
+.plan__summary {
+  color: var(--ink-3);
+  font-size: var(--fs-small);
+  line-height: 1.62;
+}
+.plan--featured .plan__summary { color: var(--on-dark-2); }
+
+.plan__features {
+  display: grid;
+  gap: 0.6rem;
+  margin-block: 0.4rem 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+.plan--featured .plan__features {
+  border-top-color: var(--dark-line);
+  color: var(--on-dark);
+}
+.plan__features li {
+  position: relative;
+  padding-left: 1.5rem;
+  line-height: 1.5;
+}
+/* A drawn tick, not a glyph, so it matches the arrow icons' stroke. */
+.plan__features li::before {
+  content: '';
+  position: absolute;
+  left: 0.15rem;
+  top: 0.32em;
+  width: 0.55rem;
+  height: 0.3rem;
+  border-left: 2px solid var(--brand);
+  border-bottom: 2px solid var(--brand);
+  transform: rotate(-45deg);
+}
+.plan--featured .plan__features li::before { border-color: var(--brand-on-dark); }
+
+.plan__cta { margin-top: auto; align-self: flex-start; }
+
+.pricing__footnote {
+  margin-top: clamp(1.25rem, 2.5vw, 2rem);
+  max-width: 60ch;
+  color: var(--ink-4);
+  font-size: var(--fs-micro);
+  line-height: 1.6;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .plans { grid-template-columns: repeat(2, 1fr); }
+  .plan:last-child { grid-column: 1 / -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan { transition: none; }
+  .plan:hover { transform: none; }
+}

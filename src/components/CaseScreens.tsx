@@ -1,13 +1,13 @@
 import './CaseScreens.css';
 
 /** Elegant, obviously-empty slot for the cases that have no assets yet. */
-export function PlaceholderMockup({ index }: { index: string }) {
+export function PlaceholderMockup({ index, label, hint }: { index: string; label: string; hint: string }) {
   return (
     <div className="devices devices--placeholder" aria-hidden="true">
       <div className="devices__slot">
         <span className="devices__slot-index">{index}</span>
-        <span className="devices__slot-label">Projecto em preparação</span>
-        <span className="devices__slot-hint">Em breve</span>
+        <span className="devices__slot-label">{label}</span>
+        <span className="devices__slot-hint">{hint}</span>
         <svg className="devices__slot-grid" viewBox="0 0 100 62" preserveAspectRatio="none">
           <defs>
             <pattern id={`grid-${index}`} width="10" height="10" patternUnits="userSpaceOnUse">

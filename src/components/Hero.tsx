@@ -6,17 +6,10 @@ import { prefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { Arrow } from './ArrowButton';
 import { useMagnetic } from '../hooks/useMagnetic';
 import { HeroMark } from './HeroMark';
+import { useContent } from '../i18n/context';
 import './Hero.css';
 
-const HEADLINE: Array<{ text: string; accent?: boolean }> = [
-  { text: 'CRIAMOS' },
-  { text: 'EXPERIÊNCIAS', accent: true },
-  { text: 'DIGITAIS QUE' },
-  { text: 'FAZEM NEGÓCIOS' },
-  { text: 'AVANÇAR.', accent: true },
-];
-
-function MoveForwardBadge() {
+function MoveForwardBadge({ label }: { label: string }) {
   return (
     <div className="hero__badge" aria-hidden="true">
       <svg viewBox="0 0 120 120" className="hero__badge-ring">
@@ -29,7 +22,7 @@ function MoveForwardBadge() {
         </defs>
         <text>
           <textPath href="#badge-path" startOffset="0">
-            AVANÇAR · AVANÇAR ·&nbsp;
+            {label}&nbsp;
           </textPath>
         </text>
       </svg>
@@ -39,6 +32,7 @@ function MoveForwardBadge() {
 }
 
 export function Hero() {
+  const t = useContent();
   const sectionRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const ctaRef = useMagnetic<HTMLAnchorElement>(16);
@@ -160,14 +154,14 @@ export function Hero() {
       <div className="hero__inner shell">
         <div className="hero__copy">
           <p className="eyebrow hero__eyebrow" data-reveal>
-            Estúdio de experiências digitais
+            {t.hero.eyebrow}
           </p>
 
           {/* No `data-reveal-mask` here: SplitText owns this element's reveal,
               and two systems on one transform is exactly the bug the rest of
               this file is careful to avoid. */}
           <h1 className="hero__headline" ref={headlineRef}>
-            {HEADLINE.map((line) => (
+            {t.hero.headline.map((line) => (
               <span key={line.text} className="hero__line">
                 <span className={line.accent ? 'accent' : undefined}>{line.text}</span>
                 {/* Separator so the h1 reads as one sentence, not run-together words. */}
@@ -181,8 +175,7 @@ export function Hero() {
             data-reveal
             style={{ ['--reveal-delay' as string]: '680ms' }}
           >
-            Websites, e-commerce e experiências digitais concebidas para elevar marcas,
-            simplificar experiências e gerar resultados.
+            {t.hero.lead}
           </p>
 
           <a
@@ -195,26 +188,28 @@ export function Hero() {
             <span className="cta-inline__dot">
               <Arrow />
             </span>
-            <span className="cta-inline__label">Falar sobre o projecto</span>
+            <span className="cta-inline__label">{t.hero.cta}</span>
           </a>
+
+          <p className="hero__offer" data-reveal style={{ ['--reveal-delay' as string]: '860ms' }}>
+            {t.hero.offer}
+          </p>
         </div>
 
         <div className="hero__visual">
-          {/* Desktop: the mark lives in the page-level <RupeStage/> and this
-              only reserves the space it parks in, so the hero layout is the
-              same whether the canvas is up yet or not.
-              Mobile: <HeroMark/> puts its canvas *in* this slot, so the mark
-              is carried by the hero rather than by the viewport. */}
+          {/* <HeroMark/> puts its canvas *in* this slot, so the mark is
+              carried by the hero rather than by the viewport. The slot shows
+              the loading skeleton until the first frame lands. */}
           <div className="hero__logo-slot" aria-hidden="true">
             <HeroMark />
           </div>
-          <MoveForwardBadge />
+          <MoveForwardBadge label={t.hero.badge} />
         </div>
       </div>
 
       <a className="hero__scroll" href="#work">
         <span className="hero__scroll-dot" aria-hidden="true" />
-        Descobrir
+        {t.hero.scroll}
       </a>
     </section>
   );

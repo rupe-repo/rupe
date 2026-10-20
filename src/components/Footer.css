@@ -109,7 +109,7 @@
    entity is named. Deliberately quieter than the menu above it. */
 .footer__legal {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr);
   gap: clamp(1.5rem, 4vw, 4rem);
   padding-block: clamp(2rem, 4vw, 2.75rem);
   border-top: 1px solid var(--dark-line);
@@ -143,6 +143,9 @@
   color: var(--brand-on-dark);
 }
 
+.footer__col a[aria-current='page'] { color: var(--brand-on-dark); }
+
 @media (max-width: 767px) {
-  .footer__legal { grid-template-columns: 1fr; }
+  .footer__legal { grid-template-columns: 1fr 1fr; }
+  .footer__entity { grid-column: 1 / -1; }
 }

@@ -5,10 +5,7 @@
   color: var(--on-dark);
   border-radius: clamp(18px, 2.4vw, 34px) clamp(18px, 2.4vw, 34px) 0 0;
   padding-bottom: clamp(3rem, 6vw, 7rem);
-  /* Clip sideways only. `overflow: clip` on both axes makes this box the
-     scrollport for sticky descendants, and the live case's sticky stretch then
-     never engages. The section's own glow is kept inside its top edge below so
-     nothing needs vertical clipping. */
+  /* Clip sideways only, so the section's glow never adds a page scrollbar. */
   overflow-x: clip;
   overflow-y: visible;
   isolation: isolate;
@@ -93,13 +90,107 @@
   .portfolio__note { justify-self: end; text-align: left; }
 }
 
-/* Cases ------------------------------------------------------------------- */
-.portfolio__cases { display: grid; }
+/* Carousel ---------------------------------------------------------------- */
+.carousel { position: relative; }
 
+/* Native scroll + snap does the moving; the scrollbar is replaced by the
+   counter and progress bar below. */
+.carousel__track {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  cursor: grab;
+  border-top: 1px solid var(--dark-line-soft);
+}
+.carousel__track::-webkit-scrollbar { display: none; }
+.carousel__track:focus-visible {
+  outline: 2px solid var(--brand-on-dark);
+  outline-offset: -2px;
+}
+/* While a mouse drags, snapping would fight the hand; it comes back on release. */
+.carousel__track.is-dragging {
+  scroll-snap-type: none;
+  cursor: grabbing;
+  user-select: none;
+}
+.carousel__track.is-dragging img { pointer-events: none; }
+
+.carousel__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  /* The mockup reaches past its column on purpose; it must not reach into
+     the next slide. */
+  overflow: clip;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.carousel__controls {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2rem);
+  padding-top: clamp(1.25rem, 3vw, 2.25rem);
+  border-top: 1px solid var(--dark-line-soft);
+}
+
+.carousel__count {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--on-dark-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.carousel__count span { color: var(--on-dark); }
+
+.carousel__progress {
+  flex: 1;
+  height: 1px;
+  background: var(--dark-line);
+  overflow: hidden;
+}
+.carousel__progress i {
+  display: block;
+  height: 100%;
+  background: var(--brand-on-dark);
+  transform-origin: left;
+  transition: transform 520ms var(--ease-out);
+}
+
+.carousel__buttons { display: flex; gap: 0.6rem; }
+
+.carousel__btn {
+  display: grid;
+  place-items: center;
+  width: clamp(2.75rem, 4vw, 3.25rem);
+  aspect-ratio: 1;
+  border: 1px solid var(--dark-line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--on-dark);
+  cursor: pointer;
+  transition: background-color 380ms var(--ease-out), border-color 380ms var(--ease-out),
+    color 380ms var(--ease-out), opacity 380ms var(--ease-out);
+}
+.carousel__btn svg { width: 1rem; height: 1rem; }
+.carousel__btn--prev svg { transform: rotate(180deg); }
+.carousel__btn:hover:not(:disabled) {
+  background: #fff;
+  border-color: #fff;
+  color: var(--dark);
+}
+.carousel__btn:focus-visible { outline: 2px solid var(--brand-on-dark); outline-offset: 3px; }
+.carousel__btn:disabled { opacity: 0.32; cursor: default; }
+
+/* Cases ------------------------------------------------------------------- */
 .case {
   position: relative;
-  padding-block: clamp(3rem, 7vw, 7rem);
-  border-top: 1px solid var(--dark-line-soft);
+  padding-block: clamp(3rem, 6vw, 5.5rem);
 }
 .case__inner {
   display: grid;
@@ -109,29 +200,13 @@
 @media (min-width: 1024px) {
   .case__inner {
     grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
-    min-height: 76svh;
+    min-height: 64svh;
   }
 
   /* The live case gives the visual the floor: roughly 40 / 60. */
   .case--live .case__inner {
     grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
     column-gap: clamp(1.5rem, 3vw, 3rem);
-  }
-
-  /* Native sticky rather than a ScrollTrigger pin: the case holds the screen
-     for an extra stretch while its timeline keeps running, and the visitor's
-     scroll is never intercepted.
-     The spacer has to be *content*, not padding — a sticky element is bounded
-     by its container's content box, so padding-bottom would shorten the travel
-     instead of lengthening it. */
-  .case--live .case__inner {
-    position: sticky;
-    top: 6vh;
-  }
-  .case--live::after {
-    content: '';
-    display: block;
-    height: 62vh;
   }
 }
 
@@ -177,9 +252,6 @@
   margin-top: 0.25rem;
 }
 
-/* `will-change` on .case__visual is applied by the scroll timeline while it is
-   active and released when it parks — see useCaseScrollMotion. */
-
 .case--placeholder .case__title { color: var(--on-dark-2); }
 .case--placeholder .btn { opacity: 0.7; pointer-events: none; }
 
@@ -203,9 +275,4 @@
   .case__desc { order: 4; }
   .case__visual { order: 5; margin-block: clamp(1.5rem, 6vw, 2.75rem); }
   .case__cta { order: 6; justify-self: start; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .case--live .case__inner { position: static; }
-  .case--live::after { display: none; }
 }

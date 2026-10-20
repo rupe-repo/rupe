@@ -18,6 +18,10 @@ export interface LogoSceneOptions {
   profile?: LogoProfile;
   /** Suppresses idle motion and pointer parallax (prefers-reduced-motion). */
   reducedMotion?: boolean;
+  /** False keeps the mark out of reach of drag and pointer — a still object. */
+  interactive?: boolean;
+  /** Fires once, after the first frame is actually on the canvas. */
+  onReady?: () => void;
   /** Fires once, the first time the visitor grabs the mark. */
   onFirstInteraction?: () => void;
   /**
@@ -147,12 +151,12 @@ export class LogoScene {
   private readonly opts: Required<
     Omit<
       LogoSceneOptions,
-      'onFirstInteraction' | 'onTooSlow' | 'onContextLost' | 'visibilityTarget'
+      'onFirstInteraction' | 'onTooSlow' | 'onContextLost' | 'visibilityTarget' | 'interactive' | 'onReady'
     >
   > &
     Pick<
       LogoSceneOptions,
-      'onFirstInteraction' | 'onTooSlow' | 'onContextLost' | 'visibilityTarget'
+      'onFirstInteraction' | 'onTooSlow' | 'onContextLost' | 'visibilityTarget' | 'interactive' | 'onReady'
     >;
   private readonly cfg: (typeof SCENE_PROFILES)[LogoProfile];
   private readonly mobile: boolean;
@@ -229,6 +233,7 @@ export class LogoScene {
    * and parks.
    */
   private readonly frozen: boolean;
+  private announced = false;
 
   constructor(container: HTMLElement, options: LogoSceneOptions = {}) {
     this.container = container;
@@ -304,7 +309,9 @@ export class LogoScene {
 
     // Touch drags the page, not the mark. Only a real pointer gets the object.
     this.interactive =
-      !this.mobile && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      this.opts.interactive !== false &&
+      !this.mobile &&
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (this.interactive) {
       window.addEventListener('pointerdown', this.onPointerDown);
       window.addEventListener('pointermove', this.onPointerMove);
@@ -902,6 +909,10 @@ export class LogoScene {
   private render() {
     if (this.disposed) return;
     this.renderer.render(this.scene, this.camera);
+    if (!this.announced) {
+      this.announced = true;
+      this.opts.onReady?.();
+    }
   }
 
   // -- teardown ------------------------------------------------------------

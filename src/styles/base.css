@@ -112,6 +112,52 @@ button {
 }
 .skip-link:focus-visible { transform: none; }
 
+/* Loading skeleton ------------------------------------------------------- */
+/* `is-booting` is set on <html> by an inline script before first paint and
+   removed when React hydrates (useBooted). In between — only on a slow load,
+   since the preloader covers the first second — everything still waiting for
+   JavaScript is drawn as a shimmering placeholder in its own shape, so the
+   page reads as being built rather than as empty. */
+:root {
+  --sk-base: #e8e5f0;
+  --sk-shine: #f8f6fd;
+  --sk-bg: linear-gradient(100deg, var(--sk-base) 30%, var(--sk-shine) 50%, var(--sk-base) 70%);
+}
+[data-nav-theme='dark'] {
+  --sk-base: rgba(255, 255, 255, 0.06);
+  --sk-shine: rgba(255, 255, 255, 0.14);
+  --sk-bg: linear-gradient(100deg, var(--sk-base) 30%, var(--sk-shine) 50%, var(--sk-base) 70%);
+}
+
+@keyframes skeleton-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+:root.is-booting [data-reveal],
+:root.is-booting [data-reveal-mask] > span,
+:root.is-booting .hero__line > span {
+  opacity: 1;
+  transform: none;
+  color: transparent !important;
+  background: var(--sk-bg);
+  background-size: 200% 100%;
+  border-radius: 8px;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+/* Display lines sit tighter than 1, so full-height bars would fuse into one
+   slab; slimmed, each line reads as its own bar. */
+:root.is-booting [data-reveal-mask] > span,
+:root.is-booting .hero__line > span {
+  display: inline-block;
+  transform: scaleY(0.72);
+}
+/* The block is the placeholder; whatever it contains waits invisibly —
+   including accent spans, which carry a colour of their own. */
+:root.is-booting [data-reveal] > * { visibility: hidden; }
+:root.is-booting [data-reveal-mask] > span * { color: transparent !important; }
+:root.is-booting .hero__headline { opacity: 1; }
+
 /* Scroll-reveal primitive ------------------------------------------------ */
 [data-reveal] {
   opacity: 0;

@@ -1,0 +1,189 @@
+/* The brief form — a card on the dark CTA, solid enough that the watermark
+   behind it never competes with the inputs. */
+.lead {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  padding: clamp(1.25rem, 2.6vw, 2rem);
+  border: 1px solid var(--dark-line);
+  border-radius: var(--r-lg);
+  background: rgba(10, 7, 19, 0.88);
+  backdrop-filter: blur(8px);
+  color: var(--on-dark);
+}
+
+.lead__title {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1rem + 0.6vw, 1.45rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.lead__row {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+}
+
+.lead__field {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.lead__field > span,
+.lead__field > legend {
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--on-dark-3);
+}
+
+.lead input:not([type='checkbox']):not([type='color']):not([type='file']),
+.lead select,
+.lead textarea {
+  width: 100%;
+  min-height: 2.9rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--dark-line);
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--on-dark);
+  font: inherit;
+  font-size: 0.9375rem;
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.lead textarea { resize: vertical; min-height: 7rem; line-height: 1.5; }
+.lead select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--on-dark-2) 50%), linear-gradient(135deg, var(--on-dark-2) 50%, transparent 50%); background-position: calc(100% - 1.1rem) 52%, calc(100% - 0.8rem) 52%; background-size: 0.3rem 0.3rem; background-repeat: no-repeat; padding-right: 2.2rem; }
+.lead select option { background: var(--dark-2); color: var(--on-dark); }
+.lead ::placeholder { color: var(--on-dark-3); opacity: 0.8; }
+.lead input:focus-visible,
+.lead select:focus-visible,
+.lead textarea:focus-visible {
+  outline: none;
+  border-color: var(--brand-on-dark);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.lead input[type='file'] {
+  font-size: var(--fs-small);
+  color: var(--on-dark-2);
+}
+.lead input[type='file']::file-selector-button {
+  margin-right: 0.75rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--dark-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--on-dark);
+  font: inherit;
+  cursor: pointer;
+}
+.lead small { font-size: 0.75rem; color: var(--on-dark-3); }
+.lead small.is-error { color: #ff8a8a; }
+
+/* Colours ---------------------------------------------------------------- */
+.lead__colors { gap: 0.6rem; }
+.lead__swatches { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+
+.lead__swatch {
+  position: relative;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  background: var(--swatch);
+  box-shadow: 0 0 0 1px var(--dark-line), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+/* The native picker fills the swatch invisibly: the circle is the control. */
+.lead__swatch input[type='color'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.lead__swatch-remove {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--on-dark);
+  color: var(--dark);
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.lead__swatch-add {
+  min-height: 2.6rem;
+  padding: 0 1rem;
+  border: 1px dashed var(--dark-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--on-dark-2);
+  font: inherit;
+  font-size: var(--fs-small);
+  cursor: pointer;
+}
+.lead__swatch-add:hover { border-color: var(--brand-on-dark); color: var(--on-dark); }
+
+/* Consent, submit, states ------------------------------------------------- */
+.lead__consent {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  font-size: var(--fs-small);
+  line-height: 1.5;
+  color: var(--on-dark-2);
+}
+.lead__consent input { margin-top: 0.2rem; accent-color: var(--brand-on-dark); }
+
+.lead__submit {
+  justify-self: start;
+  min-height: 3.2rem;
+  padding: 0 1.8rem;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: #fff;
+  color: var(--dark);
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.lead__submit:hover { background: var(--brand-on-dark); color: #fff; }
+.lead__submit:focus-visible { outline: 2px solid var(--brand-on-dark); outline-offset: 3px; }
+.lead__submit:disabled { opacity: 0.6; cursor: progress; }
+
+.lead__error { margin: 0; font-size: var(--fs-small); color: #ffb4b4; }
+.lead__error a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+
+.lead__trap {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.lead--done { gap: 0.6rem; }
+.lead__done-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 1.1rem + 1vw, 2rem);
+  font-weight: 700;
+  color: var(--brand-on-dark);
+}
+.lead__done-body { margin: 0; color: var(--on-dark-2); line-height: 1.6; }

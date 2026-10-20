@@ -15,12 +15,25 @@
   isolation: isolate;
 }
 
-.mockup__enter,
-.mockup__drift,
 .mockup__tilt {
   position: relative;
   transform-style: preserve-3d;
 }
+
+/* Loading skeleton: a shimmering screen in the devices' footprint until the
+   image arrives. The <img> reserves its box from width/height, so nothing
+   shifts when it lands. */
+.mockup:not(.is-loaded) .mockup__tilt::before {
+  content: '';
+  position: absolute;
+  inset: 4% 6% 10%;
+  border-radius: var(--r-lg);
+  background: var(--sk-bg);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+.mockup__img { transition: opacity 500ms var(--ease-out); }
+.mockup:not(.is-loaded) .mockup__img { opacity: 0; }
 
 .mockup__tilt {
   transform: translate3d(var(--mx, 0px), var(--my, 0px), 0)
@@ -41,8 +54,6 @@
 .mockup__glow {
   position: absolute;
   transform-origin: 50% 55%;
-  /* Resting value. The scroll timeline drives this between 0.15 and 0.35;
-     this is what it looks like when that timeline never runs. */
   opacity: 0.3;
   inset: 2% -8% -10%;
   z-index: -1;
@@ -89,10 +100,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mockup__enter,
-  .mockup__drift {
-    opacity: 1 !important;
-    transform: none !important;
-  }
   .mockup__tilt { transform: none; }
 }

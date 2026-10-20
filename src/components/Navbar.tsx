@@ -3,17 +3,15 @@ import { Wordmark } from './RupeMark';
 import { ArrowButton } from './ArrowButton';
 import { loadFlip } from '../lib/gsapPlugins';
 import { useMediaQuery } from '../hooks/useMediaQuery';
+import { useContent, useHref, usePage } from '../i18n/context';
 import { prefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import './Navbar.css';
 
-const LINKS = [
-  { label: 'PROJECTOS', href: '#work' },
-  { label: 'SERVIÇOS', href: '#services' },
-  { label: 'PROCESSO', href: '#process' },
-  { label: 'SOBRE', href: '#about' },
-];
-
 export function Navbar() {
+  const t = useContent();
+  const href = useHref();
+  const home = usePage().kind === 'home';
+  const LINKS = t.nav.links;
   const [condensed, setCondensed] = useState(false);
   const [onDark, setOnDark] = useState(false);
   const [open, setOpen] = useState(false);
@@ -212,14 +210,14 @@ export function Navbar() {
         ].join(' ')}
       >
         <div className="nav__inner shell">
-          <Wordmark className="nav__logo" />
+          <Wordmark className="nav__logo" label={t.homeLabel} href={home ? '#top' : t.seo.path} />
 
-          <nav className="nav__links" aria-label="Principal">
+          <nav className="nav__links" aria-label={t.nav.primaryLabel}>
             {LINKS.map((link) => (
               <a
                 key={link.href}
                 className="nav__link"
-                href={link.href}
+                href={href(link.href)}
                 data-flip-id={link.href}
               >
                 <span>{link.label}</span>
@@ -231,12 +229,12 @@ export function Navbar() {
           <div className="nav__actions">
             <ArrowButton
               className="nav__cta"
-              href="#contact"
+              href={href('#contact')}
               variant="outline"
               size="sm"
               magnetic={false}
             >
-              Falar sobre o projecto
+              {t.nav.cta}
             </ArrowButton>
 
             <button
@@ -245,7 +243,7 @@ export function Navbar() {
               className="nav__burger"
               aria-expanded={open}
               aria-controls="mobile-menu"
-              aria-label={open ? 'Fechar menu' : 'Abrir menu'}
+              aria-label={open ? t.nav.close : t.nav.open}
               onPointerEnter={primeFlip}
               onFocus={primeFlip}
               onClick={toggleMenu}
@@ -265,11 +263,11 @@ export function Navbar() {
         ref={panelRef}
         inert={!open ? true : undefined}
       >
-        <nav className="navpanel__links" aria-label="Menu">
+        <nav className="navpanel__links" aria-label={t.nav.menuLabel}>
           {LINKS.map((link, i) => (
             <a
               key={link.href}
-              href={link.href}
+              href={href(link.href)}
               data-flip-id={link.href}
               style={{ transitionDelay: `${80 + i * 55}ms` }}
               onClick={() => setOpen(false)}
@@ -280,10 +278,10 @@ export function Navbar() {
           ))}
         </nav>
         <div className="navpanel__foot" style={{ transitionDelay: '320ms' }}>
-          <ArrowButton href="#contact" onClick={() => setOpen(false)} magnetic={false}>
-            Falar sobre o projecto
+          <ArrowButton href={href('#contact')} onClick={() => setOpen(false)} magnetic={false}>
+            {t.nav.cta}
           </ArrowButton>
-          <p>Estúdio de experiências digitais</p>
+          <p>{t.tagline}</p>
         </div>
       </div>
     </>

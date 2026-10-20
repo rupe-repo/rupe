@@ -1,0 +1,197 @@
+{
+  "name": "RUPE — Ideias semanais para o blog",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "c2b4e1d3-0001-4d2f-8b20-000000000001",
+      "name": "Segunda às 9h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://rupe.pt/sitemap.xml",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "c2b4e1d3-0002-4d2f-8b20-000000000002",
+      "name": "Ler sitemap",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Existing posts, read from the live sitemap, so the ideas never repeat them.\nconst xml = String($json.data ?? '');\nconst urls = [...xml.matchAll(/<loc>([^<]+\\/blog\\/[^<]+\\/)<\\/loc>/g)].map((m) => m[1]);\nconst existing = {\n  'Portugal (pt-PT)': urls.filter((u) => !u.includes('/br/') && !u.includes('/us/')),\n  'Brasil — Curitiba (pt-BR)': urls.filter((u) => u.includes('/br/')),\n  'EUA (en-US)': urls.filter((u) => u.includes('/us/')),\n};\n\nconst prompt = `You are the SEO and content strategist for RUPE, a web design studio.\n\nTHE OFFER (same in every market): custom websites, landing pages and online stores, live in 2 days, and the client only pays if they like the result. Optional monthly maintenance covers SEO, local SEO (Google Business Profile), GEO (getting cited by ChatGPT, Gemini, Perplexity and Google AI answers), structured data, speed and blog content.\n\nMARKETS AND PRICES\n- Portugal, written in European Portuguese (AO90): landing page 199 €, business website 349 €, online store 499 €. Main market.\n- Brasil, Brazilian Portuguese, local focus on Curitiba and the Curitiba metropolitan area: R$ 400 / R$ 700 / R$ 1.000.\n- United States, American English: $300 / $525 / $750.\n\nPOSTS ALREADY PUBLISHED (do not repeat these topics):\n${JSON.stringify(existing, null, 2)}\n\nTASK: propose 5 new blog post ideas for EACH market (15 total). Each idea must target a real search that a small business owner who might hire RUPE would type. Mix: price and comparison guides, local searches (cities and neighbourhoods in that market), practical how-tos, questions people ask AI assistants, and seasonal topics for the next 4–8 weeks. Prefer topics where RUPE's offer is the natural answer. Write every field in the language of its market.\n\nReturn ONLY valid JSON, no prose, in exactly this shape:\n{\"ideas\":[{\"market\":\"Portugal|Brasil|EUA\",\"title\":\"post title, max 65 characters\",\"keyword\":\"main search query\",\"intent\":\"commercial|informational|local\",\"why\":\"one sentence on why this brings clients\",\"outline\":[\"H2 1\",\"H2 2\",\"H2 3\",\"H2 4\"],\"slug\":\"url-slug\"}]}`;\n\nreturn [{ json: { prompt } }];"
+      },
+      "id": "c2b4e1d3-0003-4d2f-8b20-000000000003",
+      "name": "Montar pedido",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'claude-sonnet-5-5', max_tokens: 6000, messages: [{ role: 'user', content: $json.prompt }] }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "c2b4e1d3-0004-4d2f-8b20-000000000004",
+      "name": "Pedir ideias ao Claude",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Anthropic (x-api-key)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Claude's reply → one readable email, grouped by market.\nconst text = ($json.content ?? []).map((part) => part.text ?? '').join('');\nlet ideas = [];\ntry {\n  ideas = JSON.parse(text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1)).ideas ?? [];\n} catch (error) {\n  return [{ json: { subject: 'Ideias do blog — a resposta não veio em JSON', html: `<pre>${text.replace(/</g, '&lt;')}</pre>` } }];\n}\n\nconst esc = (s) => String(s ?? '').replace(/[&<>\"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[c]));\nconst paths = { Portugal: 'content/blog/pt-PT/', Brasil: 'content/blog/pt-BR/', EUA: 'content/blog/en-US/' };\nconst groups = ['Portugal', 'Brasil', 'EUA'];\n\nconst html = `<div style=\"font-family:-apple-system,Segoe UI,sans-serif;color:#111;line-height:1.5\">\n<h2 style=\"margin:0 0 4px\">Ideias para o blog desta semana</h2>\n<p style=\"color:#666;margin:0 0 20px\">Para publicar: crie o ficheiro <code>slug.md</code> na pasta indicada, com o título e a descrição no topo, e faça deploy.</p>\n${groups\n  .map((g) => {\n    const list = ideas.filter((i) => i.market === g);\n    if (!list.length) return '';\n    return `<h3 style=\"margin:24px 0 8px\">${g} <span style=\"color:#888;font-weight:400\">· ${paths[g]}</span></h3>${list\n      .map(\n        (i) => `<div style=\"margin:0 0 16px;padding:12px 14px;border:1px solid #e5e2ee;border-radius:10px\">\n<b>${esc(i.title)}</b><br>\n<span style=\"color:#5b23b8\">${esc(i.keyword)}</span> · ${esc(i.intent)} · <code>${esc(i.slug)}.md</code><br>\n<span style=\"color:#555\">${esc(i.why)}</span>\n<ul style=\"margin:6px 0 0\">${(i.outline ?? []).map((h) => `<li>${esc(h)}</li>`).join('')}</ul></div>`,\n      )\n      .join('')}`;\n  })\n  .join('')}\n</div>`;\n\nreturn [{ json: { subject: `Ideias para o blog · ${new Date().toISOString().slice(0, 10)}`, html } }];"
+      },
+      "id": "c2b4e1d3-0005-4d2f-8b20-000000000005",
+      "name": "Formatar email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "rupe@rupeai.pt",
+        "toEmail": "rupe@rupeai.pt",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "c2b4e1d3-0006-4d2f-8b20-000000000006",
+      "name": "Enviar ideias",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1100,
+        300
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "",
+          "name": "SMTP rupe@rupeai.pt"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Segunda às 9h": {
+      "main": [
+        [
+          {
+            "node": "Ler sitemap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler sitemap": {
+      "main": [
+        [
+          {
+            "node": "Montar pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar pedido": {
+      "main": [
+        [
+          {
+            "node": "Pedir ideias ao Claude",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pedir ideias ao Claude": {
+      "main": [
+        [
+          {
+            "node": "Formatar email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar email": {
+      "main": [
+        [
+          {
+            "node": "Enviar ideias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

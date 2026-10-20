@@ -1,8 +1,12 @@
 /* ---------------------------------------------------------------------------
-   The way in.
+   The way in — about 1.6 s, all CSS.
 
-   A full-viewport curtain in the site's own black, lifted by clip-path at the
-   end. The mark holds still; the words come out from behind it.
+   0.00–0.45  the mark arrives
+   0.25–0.80  RUPE slides out from behind it
+   1.05–1.60  the curtain lifts (clip-path) and the lockup rises out
+
+   CSS rather than a timeline so it runs from first paint, before any
+   JavaScript; Preloader.tsx only waits for it to end.
    ------------------------------------------------------------------------- */
 .preloader {
   position: fixed;
@@ -12,78 +16,70 @@
   place-items: center;
   background: var(--dark);
   color: var(--on-dark);
-  /* The starting state of the reveal, declared here so there is no frame
-     between paint and the timeline taking over. */
-  clip-path: inset(0% 0% 0% 0%);
   padding: var(--gutter, 1.25rem);
+  clip-path: inset(0% 0% 0% 0%);
+  animation: preloader-lift 0.55s cubic-bezier(0.65, 0, 0.35, 1) 1.05s forwards;
 }
 
 /* The page does not scroll while the curtain is down. Set and removed through
    `is-preloading`, so nothing can leave `overflow: hidden` stranded on <body>
-   if the timeline throws — the class goes when the gate opens, always. */
+   — the class goes when the gate opens, always. */
 :root.is-preloading,
 :root.is-preloading body {
   overflow: hidden;
 }
 
 .preloader__stage {
-  display: grid;
-  gap: clamp(1rem, 3vh, 1.6rem);
-  justify-items: center;
-}
-
-/* -- mark and door -------------------------------------------------------- */
-.preloader__line {
   display: flex;
   align-items: center;
   gap: clamp(0.7rem, 2vw, 1.15rem);
+  animation: preloader-rise 0.42s cubic-bezier(0.55, 0, 1, 0.45) 1.05s forwards;
 }
 
 .preloader__mark {
   width: clamp(1.8rem, 4.5vw, 2.8rem);
   height: auto;
-  color: var(--brand-on-dark);
   flex: none;
-  /* GSAP's autoAlpha writes visibility too, so this starts genuinely hidden. */
-  visibility: hidden;
+  color: var(--brand-on-dark);
   opacity: 0;
+  animation: preloader-mark 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* The door itself. Every clause shares one grid cell, so the window takes the
-   width of the longest and the line never reflows as the words change. The
-   overflow is what makes a clause parked at -100% read as "behind the mark". */
+/* The door. The overflow is what makes the word parked at -100% read as
+   "behind the mark". */
 .preloader__window {
-  display: grid;
+  display: block;
   overflow: hidden;
   flex: none;
-  /* Room for the accents and the cedilla — Ç hangs below the baseline and Ê Ó Í
-     sit above the cap height, and a mask cut to the line box slices them off.
-     The negative margin hands the space straight back. */
+  /* Room above and below the glyphs; the negative margin hands it back. */
   padding-block: 0.2em 0.16em;
   margin-block: -0.2em -0.16em;
 }
 
 .preloader__word {
-  grid-area: 1 / 1;
-  white-space: nowrap;
+  display: block;
   font-family: var(--font-display);
   font-size: clamp(1.4rem, 5.4vw, 2.75rem);
   font-weight: 700;
   letter-spacing: -0.035em;
   line-height: 1.1;
-  text-transform: uppercase;
+  color: #fff;
+  transform: translateX(-100%);
+  animation: preloader-word 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.25s forwards;
 }
-.preloader__word--brand { color: #fff; }
 
-.preloader__desc {
-  margin: 0;
-  text-align: center;
-  font-size: var(--fs-micro);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--on-dark-3);
-  visibility: hidden;
-  opacity: 0;
+@keyframes preloader-mark {
+  from { opacity: 0; transform: scale(0.82); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes preloader-word {
+  to { transform: none; }
+}
+@keyframes preloader-rise {
+  to { opacity: 0; transform: translateY(-34px); }
+}
+@keyframes preloader-lift {
+  to { clip-path: inset(0% 0% 100% 0%); visibility: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {

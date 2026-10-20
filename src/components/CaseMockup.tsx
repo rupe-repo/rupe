@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from '../lib/gsap';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { prefersReducedMotion } from '../hooks/usePrefersReducedMotion';
@@ -33,12 +33,16 @@ export function CaseMockup({
   const finePointer = useMediaQuery('(hover: hover) and (pointer: fine)');
 
   const rootRef = useRef<HTMLElement>(null);
-  const enterRef = useRef<HTMLDivElement>(null);
-  const driftRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  // Until the image is in, the mockup shows the loading skeleton. A prerendered
+  // image can finish before hydration, when onLoad has already come and gone.
+  useEffect(() => {
+    if (imgRef.current?.complete) setLoaded(true);
+  }, []);
   const tiltRef = useRef<HTMLDivElement>(null);
 
-  // Entrance and scroll drift live in `useCaseScrollMotion`, which owns
-  // `.mockup__enter` and `.mockup__drift`. This component only owns the pointer.
   // Pointer response: lerped, fine-pointer only, and bounded to a few pixels.
   useEffect(() => {
     const root = rootRef.current;
@@ -113,35 +117,33 @@ export function CaseMockup({
   }, [finePointer]);
 
   return (
-    <figure className="mockup" ref={rootRef}>
+    <figure className={`mockup ${loaded ? 'is-loaded' : ''}`} ref={rootRef}>
       <span className="mockup__glow" aria-hidden="true" />
-      <div className="mockup__enter" ref={enterRef}>
-        <div className="mockup__drift" ref={driftRef}>
-          <div className="mockup__tilt" ref={tiltRef}>
-            <span className="mockup__cast" aria-hidden="true" />
-            <picture>
-              <source
-                type="image/avif"
-                srcSet={srcSet('avif')}
-                sizes="(max-width: 767px) 118vw, (max-width: 1023px) 92vw, (max-width: 1680px) 56vw, 1000px"
-              />
-              <source
-                type="image/webp"
-                srcSet={srcSet('webp')}
-                sizes="(max-width: 767px) 118vw, (max-width: 1023px) 92vw, (max-width: 1680px) 56vw, 1000px"
-              />
-              <img
-                className="mockup__img"
-                src={`${BASE}-1024.png`}
-                width={NATURAL.width}
-                height={NATURAL.height}
-                alt={alt}
-                loading="lazy"
-                decoding="async"
-              />
-            </picture>
-          </div>
-        </div>
+      <div className="mockup__tilt" ref={tiltRef}>
+        <span className="mockup__cast" aria-hidden="true" />
+        <picture>
+          <source
+            type="image/avif"
+            srcSet={srcSet('avif')}
+            sizes="(max-width: 767px) 118vw, (max-width: 1023px) 92vw, (max-width: 1680px) 56vw, 1000px"
+          />
+          <source
+            type="image/webp"
+            srcSet={srcSet('webp')}
+            sizes="(max-width: 767px) 118vw, (max-width: 1023px) 92vw, (max-width: 1680px) 56vw, 1000px"
+          />
+          <img
+            className="mockup__img"
+            src={`${BASE}-1024.png`}
+            width={NATURAL.width}
+            height={NATURAL.height}
+            alt={alt}
+            loading="lazy"
+            decoding="async"
+            ref={imgRef}
+            onLoad={() => setLoaded(true)}
+          />
+        </picture>
       </div>
     </figure>
   );

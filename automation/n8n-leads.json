@@ -1,0 +1,100 @@
+{
+  "name": "RUPE — Leads do site",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rupe-leads",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "https://rupe.pt,https://www.rupe.pt,http://localhost:4173,http://localhost:5173"
+        }
+      },
+      "id": "b1a3f0c2-0001-4c1e-9a10-000000000001",
+      "name": "Formulário do site",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "webhookId": "rupe-leads"
+    },
+    {
+      "parameters": {
+        "jsCode": "// One lead per request. The site posts multipart/form-data: text fields\n// arrive in `body`, the logo (if any) as binary data.\nconst MARKETS = {\n  'pt-PT': { name: 'Portugal', subject: 'Recebemos o seu pedido — RUPE', hello: 'Olá', body: 'Recebemos o seu pedido. Vamos criar o seu site e mostrar-lho em breve: se gostar, paga, e fica publicado em 2 dias.', sign: 'Até já,<br>RUPE' },\n  'pt-BR': { name: 'Brasil', subject: 'Recebemos seu pedido — RUPE', hello: 'Olá', body: 'Recebemos seu pedido. Vamos criar seu site e te mostrar em breve: se você gostar, paga, e ele fica no ar em 2 dias.', sign: 'Até logo,<br>RUPE' },\n  'en-US': { name: 'EUA', subject: 'We got your request — RUPE', hello: 'Hi', body: 'We got your request. We will build your site and show it to you soon: if you love it, you pay, and it goes live in 2 days.', sign: 'Talk soon,<br>RUPE' },\n};\n\nconst esc = (s) => String(s ?? '').replace(/[&<>\"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[c]));\n\nconst out = [];\nfor (const item of $input.all()) {\n  const b = item.json.body ?? {};\n  // Honeypot: a field people never see. Filled in means a bot — drop it.\n  if (b.website) continue;\n  if (!b.email || !b.name) continue;\n\n  const m = MARKETS[b.market] ?? MARKETS['pt-PT'];\n  const colors = String(b.colors ?? '').split(',').map((c) => c.trim()).filter((c) => /^#[0-9a-f]{3,8}$/i.test(c));\n  const swatches = colors\n    .map((c) => `<span style=\"display:inline-block;width:22px;height:22px;border-radius:50%;background:${c};border:1px solid #ccc;vertical-align:middle;margin-right:6px\"></span>${c}`)\n    .join('<br>');\n\n  const rows = [\n    ['Mercado', esc(m.name)],\n    ['Nome', esc(b.name)],\n    ['Email', `<a href=\"mailto:${esc(b.email)}\">${esc(b.email)}</a>`],\n    ['Telefone', esc(b.phone) || '—'],\n    ['Negócio', esc(b.business) || '—'],\n    ['O que precisa', esc(b.type) || '—'],\n    ['Projeto', esc(b.brief).replace(/\\n/g, '<br>') || '—'],\n    ['Cores', swatches || '—'],\n    ['Cores (descrição)', esc(b.colorsNote) || '—'],\n    ['Logótipo', item.binary && Object.keys(item.binary).length ? 'em anexo' : '—'],\n    ['Referência', esc(b.reference) || '—'],\n    ['Página', esc(b.page)],\n  ];\n\n  const html = `<div style=\"font-family:-apple-system,Segoe UI,sans-serif;color:#111\"><h2 style=\"margin:0 0 12px\">Novo pedido · ${esc(m.name)}</h2><table cellpadding=\"8\" style=\"border-collapse:collapse\">${rows\n    .map(([k, v]) => `<tr><td style=\"color:#666;vertical-align:top;white-space:nowrap\"><b>${k}</b></td><td>${v}</td></tr>`)\n    .join('')}</table></div>`;\n\n  const confirmation = `<div style=\"font-family:-apple-system,Segoe UI,sans-serif;color:#111;line-height:1.6\"><p>${m.hello} ${esc(b.name)},</p><p>${m.body}</p><p>${m.sign}</p></div>`;\n\n  out.push({\n    json: {\n      ...b,\n      marketName: m.name,\n      subject: `Novo lead (${m.name}) · ${b.name} · ${b.type ?? ''}`,\n      html,\n      confirmSubject: m.subject,\n      confirmHtml: confirmation,\n    },\n    binary: item.binary,\n  });\n}\nreturn out;"
+      },
+      "id": "b1a3f0c2-0002-4c1e-9a10-000000000002",
+      "name": "Preparar lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "rupe@rupeai.pt",
+        "toEmail": "rupe@rupeai.pt",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html }}",
+        "options": {
+          "attachments": "logo",
+          "replyTo": "={{ $json.email }}"
+        }
+      },
+      "id": "b1a3f0c2-0003-4c1e-9a10-000000000003",
+      "name": "Email para a RUPE",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [480, 200],
+      "credentials": {
+        "smtp": { "id": "", "name": "SMTP rupe@rupeai.pt" }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "rupe@rupeai.pt",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.confirmSubject }}",
+        "emailFormat": "html",
+        "html": "={{ $json.confirmHtml }}",
+        "options": {
+          "replyTo": "rupe@rupeai.pt"
+        }
+      },
+      "id": "b1a3f0c2-0004-4c1e-9a10-000000000004",
+      "name": "Confirmação para o cliente",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [480, 400],
+      "credentials": {
+        "smtp": { "id": "", "name": "SMTP rupe@rupeai.pt" }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true } }}",
+        "options": {}
+      },
+      "id": "b1a3f0c2-0005-4c1e-9a10-000000000005",
+      "name": "Responder ao site",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [720, 200]
+    }
+  ],
+  "connections": {
+    "Formulário do site": {
+      "main": [[{ "node": "Preparar lead", "type": "main", "index": 0 }]]
+    },
+    "Preparar lead": {
+      "main": [[
+        { "node": "Email para a RUPE", "type": "main", "index": 0 },
+        { "node": "Confirmação para o cliente", "type": "main", "index": 0 }
+      ]]
+    },
+    "Email para a RUPE": {
+      "main": [[{ "node": "Responder ao site", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": false
+}
