@@ -22,7 +22,7 @@ workflow, que:
 3. Ative o workflow (interruptor *Active*).
 4. Abra o nó **Formulário do site** e copie o **Production URL**. Se for diferente do que está
    em `.env.production` (`VITE_LEADS_WEBHOOK_URL`), atualize lá e faça um novo build.
-5. Se o site ficar noutro domínio além de rupe.pt, acrescente-o em *Allowed Origins (CORS)* no
+5. Se o site ficar noutro domínio além de www.rupeai.pt, acrescente-o em *Allowed Origins (CORS)* no
    mesmo nó.
 
 **Testar:** preencha o formulário no site publicado (ou em `npm run preview`). O email deve
@@ -36,7 +36,7 @@ de "Preparar lead".
 
 Todas as segundas às 9h:
 
-1. lê `https://rupe.pt/sitemap.xml` para saber que artigos já existem;
+1. lê `https://www.rupeai.pt/sitemap.xml` para saber que artigos já existem;
 2. pede ao Claude (modelo `claude-sonnet-5-5`) 5 ideias por mercado — Portugal, Brasil/Curitiba
    e EUA — com título, palavra-chave, intenção de pesquisa, porque traz clientes e a estrutura
    do artigo;
@@ -55,9 +55,9 @@ Todas as segundas às 9h:
 Cada artigo é um ficheiro Markdown:
 
 ```
-content/blog/pt-PT/<slug>.md   →  rupe.pt/blog/<slug>/
-content/blog/pt-BR/<slug>.md   →  rupe.pt/br/blog/<slug>/
-content/blog/en-US/<slug>.md   →  rupe.pt/us/blog/<slug>/
+content/blog/pt-PT/<slug>.md   →  www.rupeai.pt/blog/<slug>/
+content/blog/pt-BR/<slug>.md   →  www.rupeai.pt/br/blog/<slug>/
+content/blog/en-US/<slug>.md   →  www.rupeai.pt/us/blog/<slug>/
 ```
 
 Com este cabeçalho:

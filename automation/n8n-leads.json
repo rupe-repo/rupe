@@ -7,7 +7,7 @@
         "path": "rupe-leads",
         "responseMode": "responseNode",
         "options": {
-          "allowedOrigins": "https://rupe.pt,https://www.rupe.pt,http://localhost:4173,http://localhost:5173"
+          "allowedOrigins": "https://www.rupeai.pt,https://rupeai.pt,http://localhost:4173,http://localhost:5173"
         }
       },
       "id": "b1a3f0c2-0001-4c1e-9a10-000000000001",

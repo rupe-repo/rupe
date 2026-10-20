@@ -112,7 +112,7 @@ written for Curitiba) and `/us/` (United States, en-US). All copy lives in
 `src/i18n/`, one file per market, checked against one `Content` type. The build fills
 each page's head (title, canonical, hreflang, Open Graph, JSON-LD) from the same files
 and prerenders the body, so crawlers get the full text without running JavaScript.
-The domain is `SITE_URL` in `vite.config.ts` (default `https://rupe.pt`).
+The domain is `SITE_URL` in `vite.config.ts` (default `https://www.rupeai.pt`; rupeai.pt redirects to it).
 
 Each market also has a blog — `/blog/`, `/br/blog/`, `/us/blog/` — built from Markdown in
 `content/blog/<locale>/`, one prerendered page per post, listed in the sitemap and

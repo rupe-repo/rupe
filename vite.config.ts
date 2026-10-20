@@ -15,7 +15,7 @@ import { loadPosts } from './scripts/blog';
  * every market page's canonical, hreflang, og: and JSON-LD, plus robots.txt and
  * sitemap.xml. Override with SITE_URL in the deploy environment.
  */
-const SITE_URL = (process.env.SITE_URL ?? 'https://rupe.pt').replace(/\/+$/, '');
+const SITE_URL = (process.env.SITE_URL ?? 'https://www.rupeai.pt').replace(/\/+$/, '');
 
 const ROOT = import.meta.dirname;
 const SSR_OUT = resolve(ROOT, 'node_modules/.rupe-prerender');
